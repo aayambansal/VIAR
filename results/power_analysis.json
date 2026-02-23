@@ -1,0 +1,39 @@
+{
+  "accuracy_analysis": {
+    "pope_500": {
+      "cohens_h": 0.02182333964106009,
+      "post_hoc_power": 0.05316545191585749,
+      "required_n_80_power": 32961
+    },
+    "pope_9k": {
+      "cohens_h": 0.006945668511121994,
+      "post_hoc_power": 0.06758331724189144,
+      "required_n_80_power": 325395,
+      "bayesian_p_better": 0.67764,
+      "bayesian_post_mean_diff": 0.0024594295339500673,
+      "bayesian_95ci": [
+        -0.008025316067722912,
+        0.012996837054320667
+      ]
+    }
+  },
+  "yesratio_analysis": {
+    "pope_500": {
+      "cohens_h": 0.144502365941527
+    },
+    "pope_9k": {
+      "cohens_h": 0.04896684616752567,
+      "bayesian_p_shift": 0.99954,
+      "bayesian_post_mean_shift": 0.02386062285171265,
+      "bayesian_95ci": [
+        0.00960055959363829,
+        0.03813301868354476
+      ]
+    }
+  },
+  "interpretation": {
+    "accuracy_effect": "Very small (h < 0.05). Would need >75K samples for 80% power.",
+    "yesratio_effect": "Small-to-medium. The calibration shift is the more robust finding.",
+    "bayesian_conclusion": "P(VIAR better) = 67.8% (accuracy), 100.0% (yes-ratio). Bayesian analysis favors VIAR for yes-ratio shift but is inconclusive for accuracy."
+  }
+}

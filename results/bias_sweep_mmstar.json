@@ -1,0 +1,23 @@
+{
+  "model": "llava-hf/llava-1.5-7b-hf",
+  "benchmark": "mmstar",
+  "target_layers": [8, 9, 10, 11, 12, 13, 14, 15, 16],
+  "num_samples": 200,
+  "sweep": {
+    "0.0":  {"accuracy": 0.4800, "correct": 96, "total": 200},
+    "0.5":  {"accuracy": 0.4700, "correct": 94, "total": 200},
+    "1.0":  {"accuracy": 0.4950, "correct": 99, "total": 200},
+    "2.0":  {"accuracy": 0.4800, "correct": 96, "total": 200},
+    "3.0":  {"accuracy": 0.4150, "correct": 83, "total": 200},
+    "5.0":  {"accuracy": 0.3450, "correct": 69, "total": 200},
+    "8.0":  {"accuracy": 0.3150, "correct": 63, "total": 200},
+    "10.0": {"accuracy": 0.3100, "correct": 62, "total": 200}
+  },
+  "analysis": {
+    "optimal_bias": 1.0,
+    "optimal_accuracy": 0.4950,
+    "baseline_accuracy_200": 0.4800,
+    "improvement": 0.015,
+    "note": "MMStar shows minor improvement at bias=1.0 (+1.5%). Higher biases degrade performance monotonically. Baseline here is 48% on first 200 samples vs 32.4% on full 1500 — suggests the first 200 samples may be easier (category distribution effect). Need to verify with full eval."
+  }
+}

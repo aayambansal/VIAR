@@ -1,0 +1,16 @@
+{
+  "model": "llava-hf/llava-1.5-7b-hf",
+  "benchmark": "pope",
+  "attn_bias": 2.0,
+  "num_samples": 200,
+  "configs": {
+    "baseline":     {"accuracy": 0.8200, "correct": 164, "total": 200, "layers": []},
+    "neglect_8_16": {"accuracy": 0.8450, "correct": 169, "total": 200, "layers": [8,9,10,11,12,13,14,15,16]},
+    "deep_neglect": {"accuracy": 0.8250, "correct": 165, "total": 200, "layers": [9,10,11,12,13,14,15]},
+    "early_0_7":    {"accuracy": 0.8200, "correct": 164, "total": 200, "layers": [0,1,2,3,4,5,6,7]},
+    "late_17_31":   {"accuracy": 0.8250, "correct": 165, "total": 200, "layers": [17,18,19,20,21,22,23,24,25,26,27,28,29,30,31]},
+    "final_31":     {"accuracy": 0.8200, "correct": 164, "total": 200, "layers": [31]},
+    "all_layers":   {"accuracy": 0.8200, "correct": 164, "total": 200, "layers": [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31]},
+    "adaptive":     {"accuracy": 0.8150, "correct": 163, "total": 200, "layers": [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31]}
+  }
+}

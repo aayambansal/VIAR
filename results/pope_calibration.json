@@ -1,0 +1,471 @@
+{
+  "model": "llava-hf/llava-1.5-7b-hf",
+  "benchmark": "pope",
+  "num_samples": 500,
+  "attn_bias": 2.0,
+  "results": {
+    "baseline": {
+      "accuracy": 0.836,
+      "f1": 0.8233,
+      "precision": 0.8925,
+      "recall": 0.764,
+      "yes_ratio": 0.428,
+      "ece": 0.04325,
+      "brier_score": 0.1234,
+      "total": 500,
+      "ece_bins": [
+        {
+          "bin": "(0.4, 0.5]",
+          "count": 10,
+          "avg_conf": 0.4555,
+          "avg_acc": 0.5,
+          "gap": 0.0445
+        },
+        {
+          "bin": "(0.5, 0.6]",
+          "count": 25,
+          "avg_conf": 0.5605,
+          "avg_acc": 0.76,
+          "gap": 0.1995
+        },
+        {
+          "bin": "(0.6, 0.7]",
+          "count": 45,
+          "avg_conf": 0.6582,
+          "avg_acc": 0.5778,
+          "gap": 0.0805
+        },
+        {
+          "bin": "(0.7, 0.8]",
+          "count": 52,
+          "avg_conf": 0.7553,
+          "avg_acc": 0.7115,
+          "gap": 0.0438
+        },
+        {
+          "bin": "(0.8, 0.9]",
+          "count": 96,
+          "avg_conf": 0.858,
+          "avg_acc": 0.8229,
+          "gap": 0.0351
+        },
+        {
+          "bin": "(0.9, 1.0]",
+          "count": 272,
+          "avg_conf": 0.9519,
+          "avg_acc": 0.9265,
+          "gap": 0.0254
+        }
+      ]
+    },
+    "viar": {
+      "accuracy": 0.844,
+      "f1": 0.844,
+      "precision": 0.844,
+      "recall": 0.844,
+      "yes_ratio": 0.5,
+      "ece": 0.04617,
+      "brier_score": 0.12198,
+      "total": 500,
+      "ece_bins": [
+        {
+          "bin": "(0.3, 0.4]",
+          "count": 10,
+          "avg_conf": 0.3683,
+          "avg_acc": 0.7,
+          "gap": 0.3317
+        },
+        {
+          "bin": "(0.4, 0.5]",
+          "count": 26,
+          "avg_conf": 0.4469,
+          "avg_acc": 0.5769,
+          "gap": 0.13
+        },
+        {
+          "bin": "(0.5, 0.6]",
+          "count": 19,
+          "avg_conf": 0.5595,
+          "avg_acc": 0.6842,
+          "gap": 0.1247
+        },
+        {
+          "bin": "(0.6, 0.7]",
+          "count": 41,
+          "avg_conf": 0.6541,
+          "avg_acc": 0.6829,
+          "gap": 0.0288
+        },
+        {
+          "bin": "(0.7, 0.8]",
+          "count": 62,
+          "avg_conf": 0.7555,
+          "avg_acc": 0.8065,
+          "gap": 0.051
+        },
+        {
+          "bin": "(0.8, 0.9]",
+          "count": 73,
+          "avg_conf": 0.8564,
+          "avg_acc": 0.7671,
+          "gap": 0.0892
+        },
+        {
+          "bin": "(0.9, 1.0]",
+          "count": 269,
+          "avg_conf": 0.9523,
+          "avg_acc": 0.9405,
+          "gap": 0.0118
+        }
+      ]
+    }
+  },
+  "qualitative": {
+    "baseline_wrong_viar_right": [
+      {
+        "idx": 16,
+        "question": "Is there a car in the image?",
+        "answer": "yes",
+        "baseline_pred": "no",
+        "viar_pred": "yes",
+        "baseline_p_yes": 0.18832,
+        "viar_p_yes": 0.38862
+      },
+      {
+        "idx": 38,
+        "question": "Is there a spoon in the image?",
+        "answer": "yes",
+        "baseline_pred": "no",
+        "viar_pred": "yes",
+        "baseline_p_yes": 0.33633,
+        "viar_p_yes": 0.4649
+      },
+      {
+        "idx": 40,
+        "question": "Is there a fork in the image?",
+        "answer": "yes",
+        "baseline_pred": "no",
+        "viar_pred": "yes",
+        "baseline_p_yes": 0.30239,
+        "viar_p_yes": 0.42441
+      },
+      {
+        "idx": 76,
+        "question": "Is there a chair in the image?",
+        "answer": "yes",
+        "baseline_pred": "no",
+        "viar_pred": "yes",
+        "baseline_p_yes": 0.22816,
+        "viar_p_yes": 0.35042
+      },
+      {
+        "idx": 90,
+        "question": "Is there a knife in the image?",
+        "answer": "yes",
+        "baseline_pred": "no",
+        "viar_pred": "yes",
+        "baseline_p_yes": 0.27513,
+        "viar_p_yes": 0.36297
+      },
+      {
+        "idx": 98,
+        "question": "Is there a remote in the image?",
+        "answer": "yes",
+        "baseline_pred": "no",
+        "viar_pred": "yes",
+        "baseline_p_yes": 0.13207,
+        "viar_p_yes": 0.40169
+      },
+      {
+        "idx": 132,
+        "question": "Is there a tv in the image?",
+        "answer": "yes",
+        "baseline_pred": "no",
+        "viar_pred": "yes",
+        "baseline_p_yes": 0.20818,
+        "viar_p_yes": 0.34158
+      },
+      {
+        "idx": 191,
+        "question": "Is there a bench in the image?",
+        "answer": "no",
+        "baseline_pred": "yes",
+        "viar_pred": "no",
+        "baseline_p_yes": 0.48633,
+        "viar_p_yes": 0.27669
+      },
+      {
+        "idx": 194,
+        "question": "Is there a remote in the image?",
+        "answer": "yes",
+        "baseline_pred": "no",
+        "viar_pred": "yes",
+        "baseline_p_yes": 0.35042,
+        "viar_p_yes": 0.45908
+      },
+      {
+        "idx": 198,
+        "question": "Is there a snowboard in the image?",
+        "answer": "yes",
+        "baseline_pred": "no",
+        "viar_pred": "yes",
+        "baseline_p_yes": 0.24945,
+        "viar_p_yes": 0.59078
+      },
+      {
+        "idx": 224,
+        "question": "Is there a fork in the image?",
+        "answer": "yes",
+        "baseline_pred": "no",
+        "viar_pred": "yes",
+        "baseline_p_yes": 0.31237,
+        "viar_p_yes": 0.48633
+      },
+      {
+        "idx": 228,
+        "question": "Is there a tv in the image?",
+        "answer": "yes",
+        "baseline_pred": "no",
+        "viar_pred": "yes",
+        "baseline_p_yes": 0.2926,
+        "viar_p_yes": 0.62062
+      },
+      {
+        "idx": 278,
+        "question": "Is there a chair in the image?",
+        "answer": "yes",
+        "baseline_pred": "no",
+        "viar_pred": "yes",
+        "baseline_p_yes": 0.3942,
+        "viar_p_yes": 0.59267
+      },
+      {
+        "idx": 284,
+        "question": "Is there a suitcase in the image?",
+        "answer": "yes",
+        "baseline_pred": "no",
+        "viar_pred": "yes",
+        "baseline_p_yes": 0.22135,
+        "viar_p_yes": 0.53315
+      },
+      {
+        "idx": 310,
+        "question": "Is there a sports ball in the image?",
+        "answer": "yes",
+        "baseline_pred": "no",
+        "viar_pred": "yes",
+        "baseline_p_yes": 0.31069,
+        "viar_p_yes": 0.35577
+      },
+      {
+        "idx": 364,
+        "question": "Is there a broccoli in the image?",
+        "answer": "yes",
+        "baseline_pred": "no",
+        "viar_pred": "yes",
+        "baseline_p_yes": 0.29747,
+        "viar_p_yes": 0.49609
+      },
+      {
+        "idx": 376,
+        "question": "Is there a handbag in the image?",
+        "answer": "yes",
+        "baseline_pred": "no",
+        "viar_pred": "yes",
+        "baseline_p_yes": 0.26741,
+        "viar_p_yes": 0.37388
+      },
+      {
+        "idx": 386,
+        "question": "Is there a bottle in the image?",
+        "answer": "yes",
+        "baseline_pred": "no",
+        "viar_pred": "yes",
+        "baseline_p_yes": 0.39048,
+        "viar_p_yes": 0.43015
+      },
+      {
+        "idx": 478,
+        "question": "Is there a backpack in the image?",
+        "answer": "yes",
+        "baseline_pred": "no",
+        "viar_pred": "yes",
+        "baseline_p_yes": 0.31912,
+        "viar_p_yes": 0.41111
+      },
+      {
+        "idx": 482,
+        "question": "Is there a horse in the image?",
+        "answer": "yes",
+        "baseline_pred": "no",
+        "viar_pred": "yes",
+        "baseline_p_yes": 0.25534,
+        "viar_p_yes": 0.67747
+      },
+      {
+        "idx": 488,
+        "question": "Is there a laptop in the image?",
+        "answer": "yes",
+        "baseline_pred": "no",
+        "viar_pred": "yes",
+        "baseline_p_yes": 0.37754,
+        "viar_p_yes": 0.5
+      }
+    ],
+    "baseline_right_viar_wrong": [
+      {
+        "idx": 15,
+        "question": "Is there a motorcycle in the image?",
+        "answer": "no",
+        "baseline_pred": "no",
+        "viar_pred": "yes",
+        "baseline_p_yes": 0.24653,
+        "viar_p_yes": 0.413
+      },
+      {
+        "idx": 17,
+        "question": "Is there a truck in the image?",
+        "answer": "no",
+        "baseline_pred": "no",
+        "viar_pred": "yes",
+        "baseline_p_yes": 0.33285,
+        "viar_p_yes": 0.60952
+      },
+      {
+        "idx": 49,
+        "question": "Is there a handbag in the image?",
+        "answer": "no",
+        "baseline_pred": "no",
+        "viar_pred": "yes",
+        "baseline_p_yes": 0.29098,
+        "viar_p_yes": 0.413
+      },
+      {
+        "idx": 135,
+        "question": "Is there a book in the image?",
+        "answer": "no",
+        "baseline_pred": "no",
+        "viar_pred": "yes",
+        "baseline_p_yes": 0.21469,
+        "viar_p_yes": 0.36841
+      },
+      {
+        "idx": 161,
+        "question": "Is there a chair in the image?",
+        "answer": "no",
+        "baseline_pred": "no",
+        "viar_pred": "yes",
+        "baseline_p_yes": 0.37388,
+        "viar_p_yes": 0.413
+      },
+      {
+        "idx": 219,
+        "question": "Is there a bicycle in the image?",
+        "answer": "no",
+        "baseline_pred": "no",
+        "viar_pred": "yes",
+        "baseline_p_yes": 0.30736,
+        "viar_p_yes": 0.51952
+      },
+      {
+        "idx": 227,
+        "question": "Is there a spoon in the image?",
+        "answer": "no",
+        "baseline_pred": "no",
+        "viar_pred": "yes",
+        "baseline_p_yes": 0.30075,
+        "viar_p_yes": 0.4168
+      },
+      {
+        "idx": 237,
+        "question": "Is there a handbag in the image?",
+        "answer": "no",
+        "baseline_pred": "no",
+        "viar_pred": "yes",
+        "baseline_p_yes": 0.3522,
+        "viar_p_yes": 0.49024
+      },
+      {
+        "idx": 249,
+        "question": "Is there a motorcycle in the image?",
+        "answer": "no",
+        "baseline_pred": "no",
+        "viar_pred": "yes",
+        "baseline_p_yes": 0.1394,
+        "viar_p_yes": 0.43206
+      },
+      {
+        "idx": 269,
+        "question": "Is there a bicycle in the image?",
+        "answer": "no",
+        "baseline_pred": "no",
+        "viar_pred": "yes",
+        "baseline_p_yes": 0.34511,
+        "viar_p_yes": 0.5813
+      },
+      {
+        "idx": 297,
+        "question": "Is there a cup in the image?",
+        "answer": "no",
+        "baseline_pred": "no",
+        "viar_pred": "yes",
+        "baseline_p_yes": 0.4149,
+        "viar_p_yes": 0.38491
+      },
+      {
+        "idx": 333,
+        "question": "Is there a cup in the image?",
+        "answer": "no",
+        "baseline_pred": "no",
+        "viar_pred": "yes",
+        "baseline_p_yes": 0.36116,
+        "viar_p_yes": 0.37754
+      },
+      {
+        "idx": 369,
+        "question": "Is there a truck in the image?",
+        "answer": "no",
+        "baseline_pred": "no",
+        "viar_pred": "yes",
+        "baseline_p_yes": 0.25534,
+        "viar_p_yes": 0.4436
+      },
+      {
+        "idx": 371,
+        "question": "Is there a cup in the image?",
+        "answer": "no",
+        "baseline_pred": "no",
+        "viar_pred": "yes",
+        "baseline_p_yes": 0.34687,
+        "viar_p_yes": 0.48243
+      },
+      {
+        "idx": 417,
+        "question": "Is there a car in the image?",
+        "answer": "no",
+        "baseline_pred": "no",
+        "viar_pred": "yes",
+        "baseline_p_yes": 0.40545,
+        "viar_p_yes": 0.4187
+      },
+      {
+        "idx": 435,
+        "question": "Is there a traffic light in the image?",
+        "answer": "no",
+        "baseline_pred": "no",
+        "viar_pred": "yes",
+        "baseline_p_yes": 0.2926,
+        "viar_p_yes": 0.47268
+      },
+      {
+        "idx": 455,
+        "question": "Is there a tennis racket in the image?",
+        "answer": "no",
+        "baseline_pred": "no",
+        "viar_pred": "yes",
+        "baseline_p_yes": 0.05033,
+        "viar_p_yes": 0.54674
+      }
+    ]
+  }
+}

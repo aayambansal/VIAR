@@ -1,0 +1,27 @@
+{
+  "model": "llava-hf/llava-1.5-7b-hf",
+  "benchmark": "hallusionbench",
+  "dataset": "lmms-lab/HallusionBench",
+  "split": "image",
+  "attn_bias": 2.0,
+  "results": {
+    "baseline": {
+      "accuracy": 0.5174,
+      "f1": 0.4872,
+      "precision": 0.4413,
+      "recall": 0.5436,
+      "yes_ratio": 0.5195,
+      "total": 951,
+      "skipped": 0
+    },
+    "viar": {
+      "accuracy": 0.5079,
+      "f1": 0.5165,
+      "precision": 0.4409,
+      "recall": 0.6234,
+      "yes_ratio": 0.5962,
+      "total": 951,
+      "skipped": 0
+    }
+  }
+}

@@ -1,0 +1,47 @@
+{
+  "model": "llava-hf/llava-1.5-7b-hf",
+  "benchmark": "mmstar",
+  "attn_bias": 1.0,
+  "num_samples": 1500,
+  "configs": {
+    "baseline": {
+      "accuracy": 0.3227,
+      "correct": 484,
+      "total": 1500,
+      "by_category": {
+        "coarse perception":      {"accuracy": 0.5520, "correct": 138, "total": 250},
+        "fine-grained perception": {"accuracy": 0.2800, "correct": 70, "total": 250},
+        "instance reasoning":     {"accuracy": 0.3640, "correct": 91, "total": 250},
+        "logical reasoning":      {"accuracy": 0.2880, "correct": 72, "total": 250},
+        "math":                   {"accuracy": 0.2640, "correct": 66, "total": 250},
+        "science & technology":   {"accuracy": 0.1880, "correct": 47, "total": 250}
+      }
+    },
+    "neglect_8_16": {
+      "accuracy": 0.3340,
+      "correct": 501,
+      "total": 1500,
+      "by_category": {
+        "coarse perception":      {"accuracy": 0.5680, "correct": 142, "total": 250},
+        "fine-grained perception": {"accuracy": 0.2880, "correct": 72, "total": 250},
+        "instance reasoning":     {"accuracy": 0.3880, "correct": 97, "total": 250},
+        "logical reasoning":      {"accuracy": 0.2960, "correct": 74, "total": 250},
+        "math":                   {"accuracy": 0.2520, "correct": 63, "total": 250},
+        "science & technology":   {"accuracy": 0.2120, "correct": 53, "total": 250}
+      }
+    },
+    "adaptive": {
+      "accuracy": 0.3407,
+      "correct": 511,
+      "total": 1500,
+      "by_category": {
+        "coarse perception":      {"accuracy": 0.5800, "correct": 145, "total": 250},
+        "fine-grained perception": {"accuracy": 0.2760, "correct": 69, "total": 250},
+        "instance reasoning":     {"accuracy": 0.4080, "correct": 102, "total": 250},
+        "logical reasoning":      {"accuracy": 0.2840, "correct": 71, "total": 250},
+        "math":                   {"accuracy": 0.2520, "correct": 63, "total": 250},
+        "science & technology":   {"accuracy": 0.2440, "correct": 61, "total": 250}
+      }
+    }
+  }
+}

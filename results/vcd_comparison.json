@@ -1,0 +1,12 @@
+{
+  "model": "llava-hf/llava-1.5-7b-hf",
+  "benchmark": "pope",
+  "attn_bias": 2.0,
+  "vcd_alpha": 1.0,
+  "methods": {
+    "baseline": {"accuracy": 0.836, "f1": 0.8233, "precision": 0.8925, "recall": 0.764, "yes_ratio": 0.428, "total": 500},
+    "viar": {"accuracy": 0.844, "f1": 0.844, "precision": 0.844, "recall": 0.844, "yes_ratio": 0.5, "total": 500},
+    "vcd": {"accuracy": 0.79, "f1": 0.8128, "precision": 0.7331, "recall": 0.912, "yes_ratio": 0.622, "total": 500},
+    "viar+vcd": {"accuracy": 0.752, "f1": 0.7947, "precision": 0.678, "recall": 0.96, "yes_ratio": 0.708, "total": 500}
+  }
+}

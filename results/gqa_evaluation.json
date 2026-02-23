@@ -1,0 +1,10 @@
+{
+  "model": "llava-hf/llava-1.5-7b-hf",
+  "benchmark": "gqa",
+  "attn_bias": 2.0,
+  "num_samples": 500,
+  "results": {
+    "baseline": {"accuracy": 0.588, "correct": 294, "total": 500},
+    "viar": {"accuracy": 0.586, "correct": 293, "total": 500}
+  }
+}

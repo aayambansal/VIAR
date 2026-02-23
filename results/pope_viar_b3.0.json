@@ -1,0 +1,20 @@
+{
+  "model": "llava-hf/llava-1.5-7b-hf",
+  "method": "viar",
+  "benchmark": "pope",
+  "attn_bias": 3.0,
+  "target_layers": [8, 9, 10, 11, 12, 13, 14, 15, 16],
+  "accuracy": 0.8260,
+  "f1": 0.8324,
+  "precision": 0.8030,
+  "recall": 0.8640,
+  "yes_ratio": 0.5380,
+  "total": 500,
+  "comparison_to_baseline": {
+    "accuracy_delta": -0.010,
+    "f1_delta": 0.009,
+    "precision_delta": -0.090,
+    "recall_delta": 0.100,
+    "note": "VIAR boosts recall significantly (+10%) but drops precision (-9%). Yes ratio increases from 42.8% to 53.8%. Bias=3.0 may be too strong."
+  }
+}

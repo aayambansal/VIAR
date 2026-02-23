@@ -1,0 +1,15 @@
+{
+  "model": "llava-hf/llava-1.5-7b-hf",
+  "method": "baseline",
+  "benchmark": "mmstar",
+  "accuracy": 0.3240,
+  "total": 1500,
+  "by_category": {
+    "coarse perception": {"accuracy": 0.5560, "correct": 139, "total": 250},
+    "fine-grained perception": {"accuracy": 0.2800, "correct": 70, "total": 250},
+    "instance reasoning": {"accuracy": 0.3640, "correct": 91, "total": 250},
+    "logical reasoning": {"accuracy": 0.2880, "correct": 72, "total": 250},
+    "math": {"accuracy": 0.2680, "correct": 67, "total": 250},
+    "science & technology": {"accuracy": 0.1880, "correct": 47, "total": 250}
+  }
+}

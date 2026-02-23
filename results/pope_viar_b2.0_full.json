@@ -1,0 +1,25 @@
+{
+  "model": "llava-hf/llava-1.5-7b-hf",
+  "method": "viar",
+  "benchmark": "pope",
+  "attn_bias": 2.0,
+  "target_layers": [8, 9, 10, 11, 12, 13, 14, 15, 16],
+  "accuracy": 0.8440,
+  "f1": 0.8440,
+  "precision": 0.8440,
+  "recall": 0.8440,
+  "yes_ratio": 0.5000,
+  "total": 500,
+  "comparison_to_baseline": {
+    "baseline_accuracy": 0.836,
+    "accuracy_delta": 0.008,
+    "baseline_f1": 0.823,
+    "f1_delta": 0.021,
+    "baseline_precision": 0.893,
+    "precision_delta": -0.049,
+    "baseline_recall": 0.764,
+    "recall_delta": 0.080,
+    "baseline_yes_ratio": 0.428,
+    "note": "VIAR bias=2.0 achieves +0.8% accuracy, +2.1% F1. Precision drops but recall increases significantly (+8%). Yes ratio perfectly calibrated at 50.0% vs 42.8% baseline. The model becomes more balanced in its yes/no predictions."
+  }
+}

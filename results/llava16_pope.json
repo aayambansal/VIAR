@@ -1,0 +1,10 @@
+{
+  "model": "llava-hf/llava-v1.6-vicuna-7b-hf",
+  "benchmark": "pope",
+  "attn_bias": 2.0,
+  "target_layers": [10, 11, 12, 13, 14],
+  "results": {
+    "baseline": {"accuracy": 0.88, "correct": 440, "total": 500},
+    "viar": {"accuracy": 0.88, "correct": 440, "total": 500}
+  }
+}

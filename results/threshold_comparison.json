@@ -1,0 +1,151 @@
+{
+  "model": "llava-hf/llava-1.5-7b-hf",
+  "benchmark": "pope_full",
+  "attn_bias": 2.0,
+  "total_samples": 9000,
+  "baseline": {
+    "accuracy": 0.8458,
+    "yes_ratio": 0.3798
+  },
+  "viar": {
+    "accuracy": 0.8483,
+    "yes_ratio": 0.4037
+  },
+  "statistical_tests": {
+    "accuracy_diff": 0.0026,
+    "ci_95_low": -0.002,
+    "ci_95_high": 0.0069,
+    "p_one_sided": 0.1321,
+    "mcnemar_chi2": 1.207,
+    "mcnemar_p": 0.2719,
+    "baseline_only_correct": 189,
+    "viar_only_correct": 212
+  },
+  "threshold_sweep": {
+    "0.00": {
+      "accuracy": 0.8458,
+      "yes_ratio": 0.3798
+    },
+    "0.25": {
+      "accuracy": 0.8532,
+      "yes_ratio": 0.3994
+    },
+    "0.50": {
+      "accuracy": 0.857,
+      "yes_ratio": 0.4183
+    },
+    "0.75": {
+      "accuracy": 0.8611,
+      "yes_ratio": 0.4369
+    },
+    "1.00": {
+      "accuracy": 0.864,
+      "yes_ratio": 0.4631
+    },
+    "1.25": {
+      "accuracy": 0.8657,
+      "yes_ratio": 0.4879
+    },
+    "1.50": {
+      "accuracy": 0.8599,
+      "yes_ratio": 0.5114
+    },
+    "1.75": {
+      "accuracy": 0.8496,
+      "yes_ratio": 0.536
+    },
+    "2.00": {
+      "accuracy": 0.8376,
+      "yes_ratio": 0.5662
+    },
+    "2.25": {
+      "accuracy": 0.8233,
+      "yes_ratio": 0.6004
+    },
+    "2.50": {
+      "accuracy": 0.8061,
+      "yes_ratio": 0.6414
+    },
+    "2.75": {
+      "accuracy": 0.7699,
+      "yes_ratio": 0.6901
+    },
+    "3.00": {
+      "accuracy": 0.7293,
+      "yes_ratio": 0.7433
+    },
+    "3.25": {
+      "accuracy": 0.6806,
+      "yes_ratio": 0.8014
+    },
+    "3.50": {
+      "accuracy": 0.6214,
+      "yes_ratio": 0.8652
+    },
+    "3.75": {
+      "accuracy": 0.5657,
+      "yes_ratio": 0.9277
+    },
+    "4.00": {
+      "accuracy": 0.529,
+      "yes_ratio": 0.9657
+    },
+    "4.25": {
+      "accuracy": 0.5106,
+      "yes_ratio": 0.9888
+    },
+    "4.50": {
+      "accuracy": 0.5037,
+      "yes_ratio": 0.9963
+    },
+    "4.75": {
+      "accuracy": 0.5003,
+      "yes_ratio": 0.9997
+    },
+    "5.00": {
+      "accuracy": 0.5,
+      "yes_ratio": 1.0
+    },
+    "5.25": {
+      "accuracy": 0.5,
+      "yes_ratio": 1.0
+    },
+    "5.50": {
+      "accuracy": 0.5,
+      "yes_ratio": 1.0
+    },
+    "5.75": {
+      "accuracy": 0.5,
+      "yes_ratio": 1.0
+    },
+    "6.00": {
+      "accuracy": 0.5,
+      "yes_ratio": 1.0
+    }
+  },
+  "best_threshold_at_50_yes_ratio": {
+    "bias": "1.25",
+    "accuracy": 0.8657
+  },
+  "logit_attribution": {
+    "mean_delta": 0.2354,
+    "std_delta": 0.5085,
+    "median_delta": 0.2266,
+    "fraction_increased_yes": 0.6827,
+    "correlation_baseline_delta": -0.0598,
+    "by_confidence": {
+      "low_conf_lt2": {
+        "count": 3177,
+        "mean_delta": 0.2822
+      },
+      "med_conf_2to5": {
+        "count": 5812,
+        "mean_delta": 0.2112
+      },
+      "high_conf_gt5": {
+        "count": 11,
+        "mean_delta": -0.4915
+      }
+    }
+  }
+}

@@ -1,0 +1,11 @@
+{
+  "model": "llava-hf/llava-1.5-7b-hf",
+  "method": "baseline",
+  "benchmark": "pope",
+  "accuracy": 0.8360,
+  "f1": 0.8233,
+  "precision": 0.8925,
+  "recall": 0.7640,
+  "yes_ratio": 0.4280,
+  "total": 500
+}
