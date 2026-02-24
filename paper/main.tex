@@ -42,7 +42,7 @@
 % ABSTRACT
 %==============================================================================
 \begin{abstract}
-We discover and characterize the \emph{visual neglect zone}, a systematic pattern in vision-language models (VLMs) where middle transformer layers allocate disproportionately low attention to visual tokens compared to text tokens. Profiling four architectures (LLaVA-1.5-7B, LLaVA-NeXT-Mistral-7B, InstructBLIP-Vicuna-7B, and Qwen2-VL-7B), we find that visual attention fraction follows a U-shaped curve in direct-projection models: early and late layers engage visual tokens, while a contiguous band of middle layers systematically neglects them. The U-shape is present in both LLaVA variants (Vicuna and Mistral backbones, profile correlation $r{=}0.70$) but absent in Q-Former and alternative architectures, establishing it as a structural property of the direct-projection design. Using a decomposed attention metric that isolates text-query$\to$visual-key attention, we confirm this pattern reflects genuine modality imbalance rather than a measurement artifact. Hidden-state analysis provides definitive mechanistic evidence: comparing model activations on real images versus null (black) images reveals that layer~31's residual update has cosine similarity 0.922 regardless of image content, functioning as a near-pure language prior readout. Independent gradient attribution confirms that visual information relevance decays monotonically across layers, with a steeper-than-baseline 5$\times$ drop through the neglect zone. To probe the causal significance of this pattern, we propose \method{} (Vision-Informed Attention Rebalancing), a simple training-free intervention that adds an additive bias to pre-softmax attention scores at visual token positions in the neglect zone layers. On POPE, \method{} perfectly calibrates yes-ratio from 42.8\% to 50.0\% (matching the balanced ground truth distribution) and improves accuracy from 83.6\% to 84.4\%, with improved Brier score (0.123$\to$0.122); Visual Contrastive Decoding overshoots to 62.2\%. On MMStar, an adaptive variant improves overall accuracy by 1.8 percentage points, with gains concentrated in visually demanding categories (+5.6\% on Science \& Technology, +4.4\% on Instance-Level recognition). Bayesian analysis on the full 9K POPE dataset confirms the calibration shift is real ($P(\text{VIAR yes-ratio} > \text{baseline}) = 99.95\%$, 95\% credible interval $[+0.010, +0.038]$) while the accuracy improvement remains genuinely ambiguous ($P = 67.8\%$; Cohen's $h = 0.007$; post-hoc power 6.8\%). We report all results with statistical tests, effect sizes, and power analysis.
+We discover and characterize the \emph{visual neglect zone}, a systematic pattern in vision-language models (VLMs) where middle transformer layers allocate disproportionately low attention to visual tokens compared to text tokens. Profiling four architectures (LLaVA-1.5-7B, LLaVA-NeXT-Mistral-7B, InstructBLIP-Vicuna-7B, and Qwen2-VL-7B), we find that visual attention fraction follows a U-shaped curve in direct-projection models: early and late layers engage visual tokens, while a contiguous band of middle layers systematically neglects them. The U-shape is present in both LLaVA variants (Vicuna and Mistral backbones, profile correlation $r{=}0.70$) but absent in Q-Former and alternative architectures, establishing it as a structural property of the direct-projection design. Using a decomposed attention metric that isolates text-query$\to$visual-key attention, we confirm this pattern reflects genuine modality imbalance rather than a measurement artifact. Hidden-state analysis provides definitive mechanistic evidence: comparing model activations on real images versus null (black) images reveals that layer~31's residual update has cosine similarity 0.922 regardless of image content, functioning as a near-pure language prior readout. Independent gradient attribution confirms that visual information relevance decays monotonically across layers, with a steeper-than-baseline 5$\times$ drop through the neglect zone. To probe the causal significance of this pattern, we propose \method{} (Vision-Informed Attention Rebalancing), a simple training-free intervention that adds an additive bias to pre-softmax attention scores at visual token positions in the neglect zone layers. On POPE, \method{} perfectly calibrates yes-ratio from 42.8\% to 50.0\% (matching the balanced ground truth distribution) and improves accuracy from 83.6\% to 84.4\%, with improved Brier score (0.123$\to$0.122); Visual Contrastive Decoding overshoots to 62.2\%. On MMStar, an adaptive variant improves overall accuracy by 1.8\%, concentrated in visually demanding categories. We report that the accuracy improvement is not statistically significant ($p{=}0.272$; Cohen's $h{=}0.007$; post-hoc power 6.8\%), while Bayesian analysis confirms the calibration shift with 99.95\% posterior probability. We frame \method{} as a proof-of-concept for the causal relevance of the neglect zone, not as a reliable performance technique.
 
 \keywords{Vision-Language Models \and Attention Analysis \and Visual Grounding \and Hallucination Mitigation \and Mechanistic Interpretability}
 \end{abstract}
@@ -67,7 +67,7 @@ In this work, we address this gap with a systematic \emph{structural mechanistic
     \item \textbf{Empirical validation with rigorous statistical reporting.} On POPE~\cite{li2023evaluating}, \method{} achieves perfect yes-ratio calibration (50.0\% vs.\ baseline 42.8\%) with improved Brier score (0.123$\to$0.122) and outperforms Visual Contrastive Decoding (VCD)~\cite{leng2024mitigating} on both accuracy and calibration. On MMStar~\cite{chen2024are}, the adaptive variant yields a 1.8\% improvement concentrated in visually demanding categories. We additionally evaluate on HallusionBench~\cite{guan2024hallusionbench}. We report that accuracy improvements are not statistically significant ($p{=}0.272$; Cohen's $h{=}0.007$ on 9K POPE; post-hoc power 6.8\%), while Bayesian analysis confirms the calibration shift with 99.95\% posterior probability. We frame \method{} as a proof-of-concept for the causal relevance of the neglect zone, not as a reliable performance technique.
 \end{enumerate}
 
-Figure~\ref{fig:multimodel} illustrates the visual neglect zone across both LLaVA variants, and Figure~\ref{fig:cross_arch} compares attention profiles across all four architectures. The remainder of this paper is organized as follows. Section~\ref{sec:related} reviews related work. Section~\ref{sec:method} formalizes the visual attention fraction metric, describes the neglect zone finding, and presents the \method{} intervention. Section~\ref{sec:experiments} reports comprehensive experimental results including cross-architecture analysis, mechanistic validation through hidden-state and gradient analyses, and per-sample correlation tests. Section~\ref{sec:discussion} interprets the findings, presents the language prior collapse evidence, and acknowledges limitations. Section~\ref{sec:conclusion} concludes.
+The cross-architecture comparison in Figure~\ref{fig:cross_arch} illustrates the visual neglect zone in direct-projection models and its absence in alternative architectures. The remainder of this paper is organized as follows. Section~\ref{sec:related} reviews related work. Section~\ref{sec:method} formalizes the visual attention fraction metric, describes the neglect zone finding, and presents the \method{} intervention. Section~\ref{sec:experiments} reports experimental results including cross-architecture analysis, mechanistic validation, and statistical tests. Section~\ref{sec:discussion} interprets the findings and acknowledges limitations. Section~\ref{sec:conclusion} concludes. Additional experiments, ablation studies, and qualitative analyses are provided in the supplementary material.
 
 %==============================================================================
 % 2. RELATED WORK
@@ -76,16 +76,16 @@ Figure~\ref{fig:multimodel} illustrates the visual neglect zone across both LLaV
 \label{sec:related}
 
 \paragraph{Vision-language models.}
-The dominant paradigm for building VLMs involves connecting a pretrained visual encoder (typically CLIP ViT~\cite{radford2021learning,dosovitskiy2021image}) to a pretrained large language model through a projection module. LLaVA~\cite{liu2024visual} introduced visual instruction tuning, where a linear or MLP projection maps CLIP features into the language model's embedding space, and the combined model is fine-tuned on instruction-following data. Subsequent work has scaled visual resolution~\cite{liu2024improved}, explored Q-Former architectures~\cite{li2023blip2}, and incorporated additional visual encoders~\cite{tong2024eyes}. Despite these improvements, the internal dynamics of how the language model backbone processes visual tokens remain underexplored.
+The dominant paradigm for building VLMs connects a pretrained visual encoder (typically CLIP ViT~\cite{radford2021learning,dosovitskiy2021image}) to a pretrained large language model through a projection module. LLaVA~\cite{liu2024visual} introduced visual instruction tuning with a linear or MLP projection mapping CLIP features into the language model's embedding space. Subsequent work has scaled visual resolution~\cite{liu2024improved}, explored Q-Former architectures~\cite{li2023blip2}, and incorporated additional visual encoders~\cite{tong2024eyes}. Despite these improvements, the internal dynamics of how the language model backbone processes visual tokens remain underexplored.
 
 \paragraph{Object hallucination in VLMs.}
-The tendency of VLMs to hallucinate objects has been documented through benchmarks including POPE~\cite{li2023evaluating}, MMStar~\cite{chen2024are}, and HallusionBench~\cite{guan2024hallusionbench}. Proposed mitigations include Visual Contrastive Decoding (VCD)~\cite{leng2024mitigating}, which contrasts outputs from original and distorted visual inputs; OPERA~\cite{huang2024opera}, which penalizes over-reliance on summary tokens; Woodpecker~\cite{yin2024woodpecker}, a post-hoc correction pipeline; and hallucination-augmented contrastive learning~\cite{jiang2024hallucination}. EOS-based approaches~\cite{yue2024less} address the tendency to generate overly long descriptions. OPERA~\cite{huang2024opera} is the closest to our work in that it identifies attention-level pathologies (``knowledge aggregation'' patterns on summary tokens), but their analysis targets a different phenomenon (column-wise attention concentration) and their intervention modifies the decoding objective via a penalty term rather than the attention computation itself. Woodpecker~\cite{yin2024woodpecker} takes a post-hoc correction approach, using an external vision model to verify and revise generated claims---a fundamentally different paradigm from our attention-level analysis. Direct quantitative comparison with these methods is not straightforward: OPERA requires modifying the decoding objective and introduces hyperparameters for the penalty term; Woodpecker requires an external expert model and operates at the text level after generation. Our method operates at a different abstraction level (pre-softmax attention masks), making the three approaches complementary rather than directly competing. Unlike all of these methods, our primary contribution is diagnostic: we characterize a layer-level pattern of visual attention neglect and use the intervention only to demonstrate its causal relevance.
+VLM hallucination has been documented through benchmarks including POPE~\cite{li2023evaluating}, MMStar~\cite{chen2024are}, and HallusionBench~\cite{guan2024hallusionbench}. Proposed mitigations include Visual Contrastive Decoding (VCD)~\cite{leng2024mitigating}, which contrasts outputs from original and distorted visual inputs; OPERA~\cite{huang2024opera}, which penalizes over-reliance on summary tokens; Woodpecker~\cite{yin2024woodpecker}, a post-hoc correction pipeline; and hallucination-augmented contrastive learning~\cite{jiang2024hallucination}. OPERA~\cite{huang2024opera} is closest to our work in identifying attention-level pathologies, but targets a different phenomenon (column-wise attention concentration) and modifies the decoding objective rather than the attention computation. Unlike all of these methods, our primary contribution is diagnostic: we characterize a layer-level pattern of visual attention neglect and use the intervention to demonstrate its causal relevance.
 
 \paragraph{Attention analysis in transformers.}
-Attention pattern analysis has a rich history in NLP. Clark~\etal{}~\cite{clark2019what} mapped syntactic attention patterns in BERT, while Voita~\etal{}~\cite{voita2019analyzing} identified specialized heads and showed that many can be pruned. Vig~\cite{vig2019multiscale} developed visualization tools for multiscale attention analysis. Abnar and Zuidema~\cite{abnar2020quantifying} proposed attention rollout and attention flow to quantify information propagation. The debate on whether attention provides faithful explanations has been extensively discussed~\cite{jain2019attention,wiegreffe2019attention}. In mechanistic interpretability, work on transformer circuits~\cite{elhage2021mathematical,olsson2022context} has identified functional components such as induction heads. Recent work on vision transformers has identified the role of register tokens in preventing attention artifacts~\cite{darcet2024vision}. Our work extends this tradition to the multimodal setting, characterizing how attention is distributed between modalities rather than between positions within a single modality.
+Clark~\etal{}~\cite{clark2019what} mapped syntactic attention patterns in BERT, while Voita~\etal{}~\cite{voita2019analyzing} identified specialized heads. Abnar and Zuidema~\cite{abnar2020quantifying} proposed attention rollout and attention flow to quantify information propagation. The debate on whether attention provides faithful explanations has been extensively discussed~\cite{jain2019attention,wiegreffe2019attention}. In mechanistic interpretability, work on transformer circuits~\cite{elhage2021mathematical,olsson2022context} has identified functional components such as induction heads. Our work extends this tradition to the multimodal setting, characterizing how attention is distributed between modalities rather than between positions within a single modality.
 
 \paragraph{Mechanistic analysis of VLMs.}
-Mechanistic interpretability of language models has progressed rapidly, with methods for locating and editing factual associations~\cite{meng2022locating} and dissecting recall mechanisms~\cite{geva2023dissecting}. However, mechanistic analysis of multimodal models remains nascent. Zhou~\etal{}~\cite{zhou2024analyzing} analyzed hallucination patterns through the lens of co-occurrence statistics and attention, and Tong~\etal{}~\cite{tong2024eyes} documented visual shortcomings of multimodal LLMs but focused on benchmark evaluation rather than internal mechanisms. Our work provides, to our knowledge, the first systematic layer-by-layer quantification of visual attention fraction across VLM architectures, revealing the U-shaped neglect zone pattern as a structural regularity. We extend beyond attention analysis to include hidden-state probing, gradient attribution, and per-sample correlation analyses, providing convergent mechanistic evidence from multiple methodologies.
+Mechanistic interpretability of language models has progressed rapidly, with methods for locating and editing factual associations~\cite{meng2022locating} and dissecting recall mechanisms~\cite{geva2023dissecting}. However, mechanistic analysis of multimodal models remains nascent. Zhou~\etal{}~\cite{zhou2024analyzing} analyzed hallucination patterns through co-occurrence statistics and attention, and Tong~\etal{}~\cite{tong2024eyes} documented visual shortcomings of multimodal LLMs but focused on benchmark evaluation rather than internal mechanisms. Our work provides, to our knowledge, the first systematic layer-by-layer quantification of visual attention fraction across VLM architectures, extending beyond attention to include hidden-state probing, gradient attribution, and per-sample correlation analyses.
 
 %==============================================================================
 % 3. METHOD
@@ -115,20 +115,11 @@ This metric answers the question: \emph{when text tokens form their representati
 \subsection{The Visual Neglect Zone}
 \label{sec:neglect_zone}
 
-We profile the visual attention fraction across all 32 transformer layers for two VLM architectures during inference on 500 POPE samples.
+We profile the visual attention fraction across all 32 transformer layers for two VLM architectures during inference on 500 POPE samples. In LLaVA-1.5-7B (CLIP ViT-L/14, 336$\times$336, $n_v = 576$), the visual attention fraction follows a distinctive U-shaped pattern. Early layers (0--7) maintain $\visFrac{} \approx 0.30$--$0.35$, indicating substantial visual engagement. A contiguous band of middle layers (8--16) shows systematically depressed visual attention, with $\visFrac{}$ dropping to 0.173--0.210. Late layers (17--30) recover to $\visFrac{} \approx 0.25$--$0.30$. Layer~31, the final transformer layer, exhibits a sharp anomaly: $\visFrac{}$ crashes to 0.141, the lowest value across all layers.
 
-\paragraph{LLaVA-1.5-7B.} This model uses a CLIP ViT-L/14 encoder at 336$\times$336 resolution, producing $n_v = 576$ visual tokens. The visual attention fraction across layers follows a distinctive U-shaped pattern (Figure~\ref{fig:multimodel}, left). Early layers (0--7) maintain $\visFrac{} \approx 0.30$--$0.35$, indicating substantial visual engagement. A contiguous band of middle layers (8--16) shows systematically depressed visual attention, with $\visFrac{}$ dropping to 0.173--0.210. Late layers (17--30) recover to $\visFrac{} \approx 0.25$--$0.30$. Layer~31, the final transformer layer, exhibits a sharp anomaly: $\visFrac{}$ crashes to 0.141, the lowest value across all layers.
+In LLaVA-1.6-Vicuna-7B ($n_v = 2880$ visual tokens from higher-resolution encoding), the same U-shaped pattern is evident despite the substantially different visual-to-text token ratio. The neglect zone is narrower (layers 10--14) with $\visFrac{}$ ranging from 0.845 to 0.870 (relatively depressed given that visual tokens dominate the sequence). The layer-31 anomaly is also present.
 
-\paragraph{LLaVA-1.6-Vicuna-7B.} This model employs a higher-resolution encoding strategy, producing $n_v = 2880$ visual tokens. Despite the substantially different visual-to-text token ratio, the same U-shaped pattern is evident (Figure~\ref{fig:multimodel}, right). The neglect zone is narrower (layers 10--14) with $\visFrac{}$ ranging from 0.845 to 0.870 (relatively depressed given that visual tokens dominate the sequence). The layer-31 anomaly is also present, with $\visFrac{}$ dropping to approximately 0.45.
-
-The consistency of this pattern across model variants with different visual token counts (576 vs.\ 2880) and different training procedures suggests that the visual neglect zone is a systematic architectural phenomenon rather than a model-specific artifact. In Section~\ref{sec:decomposed}, we verify that this pattern persists in the decomposed text$\to$vis metric (Eq.~\ref{eq:decomposed}), confirming it is not an artifact of including structurally inflated visual-query attention.
-
-\begin{figure}[t]
-    \centering
-    \includegraphics[width=\textwidth]{../figures/fig1_multimodel_attention.pdf}
-    \caption{\textbf{Visual attention fraction across transformer layers for two VLM architectures.} Both LLaVA-1.5-7B (left, 576 visual tokens) and LLaVA-1.6-Vicuna-7B (right, 2880 visual tokens) exhibit a U-shaped pattern with a contiguous ``neglect zone'' in middle layers (shaded region) and a sharp anomaly at layer~31. The neglect zone spans layers 8--16 in LLaVA-1.5 and layers 10--14 in LLaVA-1.6. Despite a $5\times$ difference in visual token count, the structural pattern is conserved.}
-    \label{fig:multimodel}
-\end{figure}
+The consistency of this pattern across model variants with different visual token counts (576 vs.\ 2880) and different training procedures suggests that the visual neglect zone is a systematic architectural phenomenon. We verify that this pattern persists in the decomposed text$\to$vis metric (Eq.~\ref{eq:decomposed}) in the supplementary material (Supplementary Section~E), confirming it is not an artifact of including structurally inflated visual-query attention.
 
 \subsection{VIAR: Vision-Informed Attention Rebalancing}
 \label{sec:viar}
@@ -157,31 +148,27 @@ where $\visFrac{}_l$ is the empirically measured visual attention fraction at la
 \section{Experiments}
 \label{sec:experiments}
 
-We evaluate \method{} across four benchmarks spanning binary VQA (POPE, HallusionBench~\cite{guan2024hallusionbench}), multiple-choice VQA (MMStar), and open-ended VQA (GQA), compare against Visual Contrastive Decoding (VCD)~\cite{leng2024mitigating}, and perform extensive ablation studies. We additionally validate our diagnostic findings with decomposed attention analysis (Section~\ref{sec:decomposed}), cross-prompt consistency tests (Section~\ref{sec:cross_prompt}), calibration and statistical analysis (Section~\ref{sec:stats}), cross-architecture profiling of four models (Section~\ref{sec:cross_arch}), hidden-state probing (Section~\ref{sec:collapse}), gradient attribution (Section~\ref{sec:gradient}), and per-sample neglect-hallucination correlation (Section~\ref{sec:persample}). All experiments use greedy decoding unless otherwise specified.
+We evaluate \method{} across four benchmarks spanning binary VQA (POPE, HallusionBench~\cite{guan2024hallusionbench}), multiple-choice VQA (MMStar), and open-ended VQA (GQA), and compare against Visual Contrastive Decoding (VCD)~\cite{leng2024mitigating}. We additionally validate our diagnostic findings with cross-architecture profiling (Section~\ref{sec:cross_arch}), hidden-state probing (Section~\ref{sec:collapse}), gradient attribution (Section~\ref{sec:gradient}), and statistical analysis (Section~\ref{sec:stats}). All experiments use greedy decoding unless otherwise specified. Additional results on GQA, HallusionBench, decomposed attention, head-level analysis, cross-prompt consistency, per-sample correlation, threshold-shift analysis, and ablation studies are in the supplementary material.
 
 \subsection{Benchmarks and Evaluation}
 \label{sec:benchmarks}
 
-\paragraph{POPE~\cite{li2023evaluating}.} A binary yes/no visual question answering benchmark designed to evaluate object hallucination. We use the random split with 500 balanced samples (50\% positive, 50\% negative). Metrics include accuracy, F1, precision, recall, and yes-ratio (the fraction of ``yes'' predictions; 50\% indicates perfect calibration for this balanced dataset).
+\paragraph{POPE~\cite{li2023evaluating}.} A binary yes/no VQA benchmark for evaluating object hallucination. We use the random split with 500 balanced samples (50\% positive, 50\% negative). Metrics: accuracy, F1, precision, recall, and yes-ratio (50\% indicates perfect calibration).
 
-\paragraph{MMStar~\cite{chen2024are}.} A multiple-choice VQA benchmark with 1500 samples spanning six categories: Coarse Perception, Fine-Grained Perception, Instance-Level Reasoning, Logical Reasoning, Mathematics, and Science \& Technology. We report per-category accuracy.
+\paragraph{MMStar~\cite{chen2024are}.} A multiple-choice VQA benchmark with 1500 samples spanning six categories: Coarse Perception, Fine-Grained Perception, Instance-Level Reasoning, Logical Reasoning, Mathematics, and Science \& Technology.
 
-\paragraph{HallusionBench~\cite{guan2024hallusionbench}.} A hallucination benchmark with 951 image-based samples spanning visual illusions, chart interpretation, and figure-ground reasoning. Each sample has a binary yes/no answer. We evaluate both baseline and \method{} on the full image split.
-
-\paragraph{GQA~\cite{hudson2019gqa}.} An open-ended VQA benchmark with compositional questions about real images. We evaluate on 500 samples using exact-match accuracy.
-
-\paragraph{Baselines.} We compare against: (1) the unmodified LLaVA-1.5-7B baseline, (2) VCD with $\alpha = 1.0$~\cite{leng2024mitigating}, and (3) the combination VIAR+VCD.
+\paragraph{Baselines.} We compare against: (1) the unmodified LLaVA-1.5-7B baseline, and (2) VCD with $\alpha = 1.0$~\cite{leng2024mitigating}. We additionally evaluate on HallusionBench~\cite{guan2024hallusionbench} (951 samples) and GQA~\cite{hudson2019gqa} (500 samples); full results are in Supplementary Sections~A--B.
 
 \subsection{Main Results on POPE}
 \label{sec:pope_results}
 
-Table~\ref{tab:pope} presents the POPE results. The baseline LLaVA-1.5-7B achieves 83.6\% accuracy with a yes-ratio of 42.8\%, indicating a systematic bias toward ``no'' answers (under-prediction of positive instances). \method{} with $b = 2.0$ applied to layers 8--16 shifts the yes-ratio to exactly 50.0\%, achieving perfect calibration for this balanced dataset. This correction improves accuracy to 84.4\% and F1 to 84.4\%, with precision and recall becoming equal at 84.4\%.
+Table~\ref{tab:pope} presents the POPE results. The baseline LLaVA-1.5-7B achieves 83.6\% accuracy with a yes-ratio of 42.8\%, indicating a systematic bias toward ``no'' answers. \method{} with $b = 2.0$ applied to layers 8--16 shifts the yes-ratio to exactly 50.0\%, achieving perfect calibration for this balanced dataset. This correction improves accuracy to 84.4\% and F1 to 84.4\%, with precision and recall becoming equal at 84.4\%.
 
-VCD overshoots in the opposite direction, shifting the yes-ratio to 62.2\% (a bias toward ``yes'' answers) and reducing accuracy to 79.0\%. Combining \method{} with VCD exacerbates this overshooting, pushing the yes-ratio to 70.8\% and accuracy to 75.2\%. These results demonstrate that the two methods are not complementary: VCD already amplifies visual signals through contrastive decoding, and adding \method{}'s attention-level boost creates excessive visual influence.
+VCD overshoots in the opposite direction, shifting the yes-ratio to 62.2\% and reducing accuracy to 79.0\%. Combining \method{} with VCD exacerbates this overshooting, pushing the yes-ratio to 70.8\% and accuracy to 75.2\%. These results demonstrate that the two methods are not complementary: VCD already amplifies visual signals through contrastive decoding, and adding \method{}'s attention-level boost creates excessive visual influence.
 
 \begin{table}[t]
     \centering
-    \caption{\textbf{POPE results} (500 samples, balanced yes/no). \method{} is the only method that improves both accuracy and calibration. VCD overshoots the yes-ratio, and their combination is detrimental. Best results in \textbf{bold}.}
+    \caption{\textbf{POPE results} (500 samples, balanced yes/no). \method{} is the only method that improves both accuracy and calibration. VCD overshoots the yes-ratio. Best results in \textbf{bold}.}
     \label{tab:pope}
     \begin{tabular}{lccccc}
         \toprule
@@ -197,24 +184,24 @@ VCD overshoots in the opposite direction, shifting the yes-ratio to 62.2\% (a bi
 
 \begin{figure}[t]
     \centering
-    \includegraphics[width=0.75\textwidth]{../figures/fig2_vcd_comparison.pdf}
-    \caption{\textbf{Calibration comparison.} Yes-ratio for each method on POPE (500 balanced samples). The dashed line at 50\% indicates perfect calibration. \method{} achieves exactly 50.0\%, while VCD overshoots to 62.2\%, demonstrating that \method{} provides a more calibrated correction.}
+    \includegraphics[width=0.7\textwidth]{../figures/fig2_vcd_comparison.pdf}
+    \caption{\textbf{Calibration comparison.} Yes-ratio for each method on POPE (500 balanced samples). The dashed line at 50\% indicates perfect calibration. \method{} achieves exactly 50.0\%, while VCD overshoots to 62.2\%.}
     \label{fig:vcd_comparison}
 \end{figure}
 
 \subsection{Cross-Model Validation}
 \label{sec:cross_model}
 
-To test the prediction that \method{} helps only when visual neglect is severe, we apply it to LLaVA-1.6-Vicuna-7B (which has a narrower neglect zone). With $b = 2.0$ applied to layers 10--14, the accuracy on POPE remains at 88.0\%, identical to the baseline. This null result is consistent with the hypothesis: the stronger model already allocates more relative attention to visual tokens in its middle layers, leaving less room for improvement through attention rebalancing. The null result on LLaVA-1.6 thus serves as a negative control that supports, rather than undermines, our mechanistic account.
+To test the prediction that \method{} helps only when visual neglect is severe, we apply it to LLaVA-1.6-Vicuna-7B (which has a narrower neglect zone). With $b = 2.0$ applied to layers 10--14, accuracy on POPE remains at 88.0\%, identical to the baseline. This null result is consistent with the hypothesis: the stronger model already allocates more relative attention to visual tokens in its middle layers, leaving less room for improvement. The null result on LLaVA-1.6 thus serves as a negative control that supports our mechanistic account.
 
 \subsection{MMStar Results}
 \label{sec:mmstar_results}
 
-Table~\ref{tab:mmstar} reports MMStar results. The uniform \method{} variant (layers 8--16, $b = 1.0$) improves overall accuracy from 32.3\% to 33.4\% (+1.1\%). The adaptive variant (Eq.~\ref{eq:adaptive}) further improves to 34.1\% (+1.8\%). Improvements are concentrated in visually demanding categories: Instance-Level Reasoning (+4.4\%) and Science \& Technology (+5.6\%). Categories that rely more on linguistic reasoning (Logical Reasoning, Mathematics) show minimal change, as expected for an intervention that boosts visual token attention.
+Table~\ref{tab:mmstar} reports MMStar results. The uniform \method{} variant (layers 8--16, $b = 1.0$) improves overall accuracy from 32.3\% to 33.4\% (+1.1\%). The adaptive variant (Eq.~\ref{eq:adaptive}) further improves to 34.1\% (+1.8\%). Improvements are concentrated in visually demanding categories: Instance-Level Reasoning (+4.4\%) and Science \& Technology (+5.6\%). Categories that rely more on linguistic reasoning show minimal change, as expected for an intervention that boosts visual token attention.
 
 \begin{table}[t]
     \centering
-    \caption{\textbf{MMStar results} (1500 samples). Improvements concentrate in visually demanding categories (Instance-Level, Science \& Technology). ``Adapt.'' denotes adaptive scaling (Eq.~\ref{eq:adaptive}).}
+    \caption{\textbf{MMStar results} (1500 samples). Improvements concentrate in visually demanding categories. ``Adapt.'' denotes adaptive scaling (Eq.~\ref{eq:adaptive}).}
     \label{tab:mmstar}
     \resizebox{\textwidth}{!}{%
     \begin{tabular}{lccccccc}
@@ -229,318 +216,88 @@ Table~\ref{tab:mmstar} reports MMStar results. The uniform \method{} variant (la
     }
 \end{table}
 
-\subsection{GQA Results}
-\label{sec:gqa_results}
-
-On GQA (500 samples), \method{} achieves 58.6\% exact-match accuracy compared to the baseline's 58.8\%. The negligible difference (within noise) indicates that \method{} does not help on open-ended visual question answering where the model must generate free-form text. This is expected: the intervention increases the relative weight of visual tokens in the attention computation, which aids discrimination in binary and multiple-choice settings but does not meaningfully change the generation dynamics for open-ended responses.
-
-\subsection{HallusionBench Results}
-\label{sec:hallusionbench}
-
-Table~\ref{tab:hallusionbench} reports results on HallusionBench~\cite{guan2024hallusionbench} (951 image-based samples). The baseline achieves 51.7\% accuracy (near chance), reflecting the difficulty of this benchmark for LLaVA-1.5-7B. \method{} achieves 50.8\%, a marginal decrease. The yes-ratio shifts from 52.0\% (approximately balanced) to 59.6\%, indicating that \method{} induces overcorrection on this benchmark where the baseline is already approximately calibrated. This result is informative: \method{}'s benefit is specific to settings where the baseline exhibits a conservative (``no'') bias. When the baseline is already near-calibrated, the additional visual attention boost pushes yes-ratio past the optimal point. This reinforces the view that \method{} is a diagnostic tool, not a universal performance enhancer.
-
-\begin{table}[t]
-    \centering
-    \caption{\textbf{HallusionBench results} (951 samples). Both methods are near chance on this challenging benchmark. \method{} overcorrects yes-ratio when the baseline is already approximately calibrated.}
-    \label{tab:hallusionbench}
-    \begin{tabular}{lccccc}
-        \toprule
-        Method & Accuracy & F1 & Precision & Recall & Yes Ratio \\
-        \midrule
-        Baseline & \textbf{51.7\%} & 48.7\% & 44.1\% & 54.4\% & 52.0\% \\
-        \method{} ($b{=}2.0$, L8--16) & 50.8\% & 51.7\% & 44.1\% & 62.3\% & 59.6\% \\
-        \bottomrule
-    \end{tabular}
-\end{table}
-
 \subsection{Statistical Significance and Effect Sizes}
 \label{sec:stats}
 
-We report rigorous statistical tests for the POPE accuracy improvement. On the initial 500-sample subset, the 95\% bootstrap CI spans $[-1.6\%, +3.4\%]$ with $p = 0.272$. On the \textbf{full 9{,}000-sample POPE dataset}, the accuracy difference narrows to $+0.26\%$ (84.58\% baseline $\to$ 84.83\% \method{}) with tighter bounds: 95\% CI $[-0.20\%, +0.69\%]$, one-sided $p = 0.132$ (Table~\ref{tab:stats}). McNemar's test yields $\chi^2 = 1.207$ ($p = 0.272$; baseline-only correct: 189, \method{}-only correct: 212). Even with the larger sample size, the accuracy improvement does not reach conventional significance thresholds. We therefore frame \method{} as a proof-of-concept for the causal relevance of the neglect zone, not as a reliable performance technique. The calibration effect---yes-ratio shifting from 38.0\% toward 40.4\% (partial correction toward balance)---is the more robust behavioral signature. On the 500-sample balanced subset used in Table~\ref{tab:pope}, the correction reaches exactly 50.0\%, reflecting the stronger effect on the balanced subset where the conservative bias is most pronounced.
+We report rigorous statistical tests for the POPE accuracy improvement. On the initial 500-sample subset, the 95\% bootstrap CI spans $[-1.6\%, +3.4\%]$ with $p = 0.272$. On the \textbf{full 9{,}000-sample POPE dataset}, the accuracy difference narrows to $+0.26\%$ (84.58\% baseline $\to$ 84.83\% \method{}) with tighter bounds: 95\% CI $[-0.20\%, +0.69\%]$, one-sided $p = 0.132$. McNemar's test yields $\chi^2 = 1.207$ ($p = 0.272$). Even with the larger sample size, the accuracy improvement does not reach conventional significance thresholds. We therefore frame \method{} as a proof-of-concept for the causal relevance of the neglect zone, not as a reliable performance technique. The calibration effect, with yes-ratio shifting from 38.0\% toward 40.4\% (partial correction toward balance), is the more robust behavioral signature. On the 500-sample balanced subset (Table~\ref{tab:pope}), the correction reaches exactly 50.0\%.
 
-\paragraph{Calibration metrics.} Beyond yes-ratio, we evaluate calibration using Expected Calibration Error (ECE, 10 equal-width bins) and Brier score computed from the model's softmax probabilities over the yes/no tokens (Table~\ref{tab:stats}). The Brier score improves slightly from 0.123 (baseline) to 0.122 (\method{}), consistent with more calibrated binary predictions. ECE is comparable between methods (0.043 baseline vs.\ 0.046 \method{}), which is expected: ECE measures the alignment between confidence and accuracy across the confidence spectrum, while \method{}'s primary effect is on the \emph{decision boundary} (shifting borderline cases from ``no'' to ``yes''), not on the confidence distribution shape. The reliability diagrams (Figure~\ref{fig:calibration}) show that \method{} redistributes samples from the high-confidence ``no'' bin into moderate-confidence bins, consistent with increased uncertainty on previously over-confident negative predictions.
-
-\paragraph{Effect sizes and power analysis.} To quantify the practical significance of the observed effects, we compute Cohen's $h$ for both accuracy and yes-ratio changes on both POPE sample sizes (Table~\ref{tab:effect_sizes}). For accuracy, Cohen's $h = 0.022$ on 500 samples and $h = 0.007$ on 9{,}000 samples, both well below the conventional ``small effect'' threshold of 0.20. For yes-ratio, the effect sizes are substantially larger: $h = 0.145$ on 500 samples and $h = 0.049$ on 9{,}000 samples, reflecting the more robust calibration shift. Post-hoc power analysis reveals that our study is severely underpowered for detecting accuracy differences: 5.3\% power on 500 samples and 6.8\% on 9{,}000 samples. Achieving 80\% power at the observed 500-sample effect size would require approximately 33{,}000 samples; at the 9K-sample effect size, approximately 325{,}000 samples would be needed. These calculations confirm that the accuracy improvement is genuinely ambiguous rather than clearly null or clearly positive.
-
-\paragraph{Bayesian analysis.} To move beyond the limitations of frequentist null-hypothesis significance testing, we conduct a Bayesian analysis of the 9K POPE results using a uniform prior on the accuracy and yes-ratio differences. The posterior probability that \method{} improves accuracy over the baseline is $P(\text{VIAR acc.} > \text{baseline}) = 67.8\%$, indicating an inconclusive result that modestly favors \method{} but is far from definitive. In contrast, the posterior probability for the yes-ratio shift is $P(\text{VIAR yes-ratio} > \text{baseline}) = 99.95\%$, providing high confidence that the calibration effect is real. The 95\% credible intervals further illustrate this asymmetry: the accuracy difference lies within $[-0.008, +0.013]$, spanning zero, while the yes-ratio difference lies within $[+0.010, +0.038]$, entirely above zero. This Bayesian perspective strongly supports the diagnostic framing: \method{}'s primary effect is calibration, not accuracy.
+Table~\ref{tab:stats_merged} consolidates the statistical analysis, including effect sizes and Bayesian posteriors. The accuracy effect is negligible (Cohen's $h = 0.007$ on 9K) with severely insufficient power (6.8\%). Achieving 80\% power at the observed effect size would require approximately 325{,}000 samples. In contrast, Bayesian analysis confirms the calibration shift: the posterior probability that \method{} shifts yes-ratio above baseline is 99.95\%, with the 95\% credible interval $[+0.010, +0.038]$ lying entirely above zero. The Brier score improves slightly from 0.123 to 0.122, consistent with more calibrated predictions. Reliability diagrams and detailed ECE analysis are in Supplementary Section~C.
 
 \begin{table}[t]
     \centering
-    \caption{\textbf{Statistical significance and calibration metrics.} Results on both the 500-sample balanced subset and the full 9{,}000-sample POPE dataset. Accuracy improvement is not statistically significant on either sample size. Yes-ratio calibration is the primary finding.}
-    \label{tab:stats}
-    \resizebox{\textwidth}{!}{%
-    \begin{tabular}{lccccc}
-        \toprule
-        & \multicolumn{2}{c}{POPE (500 balanced)} & & \multicolumn{2}{c}{POPE (9{,}000 full)} \\
-        \cmidrule{2-3} \cmidrule{5-6}
-        Metric & Baseline & \method{} & & Baseline & \method{} \\
-        \midrule
-        Accuracy & 83.6\% & 84.4\% & & 84.58\% & 84.83\% \\
-        Accuracy difference & \multicolumn{2}{c}{+0.8\%} & & \multicolumn{2}{c}{+0.26\%} \\
-        95\% Bootstrap CI & \multicolumn{2}{c}{$[-1.6\%, +3.4\%]$} & & \multicolumn{2}{c}{$[-0.20\%, +0.69\%]$} \\
-        One-sided $p$-value & \multicolumn{2}{c}{0.272} & & \multicolumn{2}{c}{0.132} \\
-        McNemar's $\chi^2$ & \multicolumn{2}{c}{0.237} & & \multicolumn{2}{c}{1.207 ($p{=}0.272$)} \\
-        Baseline-only correct & \multicolumn{2}{c}{17} & & \multicolumn{2}{c}{189} \\
-        \method{}-only correct & \multicolumn{2}{c}{21} & & \multicolumn{2}{c}{212} \\
-        \midrule
-        Yes-ratio & 42.8\% & \textbf{50.0\%} & & 38.0\% & 40.4\% \\
-        ECE (10 bins) & \textbf{0.043} & 0.046 & & --- & --- \\
-        Brier score & 0.123 & \textbf{0.122} & & --- & --- \\
-        \bottomrule
-    \end{tabular}%
-    }
-\end{table}
-
-\begin{table}[t]
-    \centering
-    \caption{\textbf{Effect sizes, power analysis, and Bayesian posterior probabilities} for POPE accuracy and yes-ratio. The accuracy effect is negligible with severely insufficient power; the yes-ratio effect is larger and confirmed by Bayesian analysis with 99.95\% posterior probability.}
-    \label{tab:effect_sizes}
+    \caption{\textbf{Statistical analysis of POPE results.} Accuracy improvement is not significant; the calibration shift is confirmed by Bayesian analysis with 99.95\% posterior probability.}
+    \label{tab:stats_merged}
     \resizebox{\textwidth}{!}{%
     \begin{tabular}{lcccc}
         \toprule
-        & \multicolumn{2}{c}{Accuracy} & \multicolumn{2}{c}{Yes-ratio} \\
+        & \multicolumn{2}{c}{POPE (500 balanced)} & \multicolumn{2}{c}{POPE (9{,}000 full)} \\
         \cmidrule(lr){2-3} \cmidrule(lr){4-5}
-        Metric & POPE (500) & POPE (9K) & POPE (500) & POPE (9K) \\
+        Metric & Baseline & \method{} & Baseline & \method{} \\
         \midrule
-        Cohen's $h$ & 0.022 & 0.007 & 0.145 & 0.049 \\
-        Post-hoc power & 5.3\% & 6.8\% & --- & --- \\
-        $N$ for 80\% power & ${\sim}33{,}000$ & ${\sim}325{,}000$ & --- & --- \\
-        Bayesian $P(\text{VIAR} > \text{baseline})$ & --- & 67.8\% & --- & 99.95\% \\
-        95\% credible interval & --- & $[-0.008, +0.013]$ & --- & $[+0.010, +0.038]$ \\
+        Accuracy & 83.6\% & 84.4\% & 84.58\% & 84.83\% \\
+        Accuracy $\Delta$ / 95\% CI & \multicolumn{2}{c}{+0.8\% [$-1.6$, $+3.4$]\%} & \multicolumn{2}{c}{+0.26\% [$-0.20$, $+0.69$]\%} \\
+        One-sided $p$ / McNemar & \multicolumn{2}{c}{$p{=}0.272$ / $\chi^2{=}0.237$} & \multicolumn{2}{c}{$p{=}0.132$ / $\chi^2{=}1.207$} \\
+        Yes-ratio & 42.8\% & \textbf{50.0\%} & 38.0\% & 40.4\% \\
+        Brier score & 0.123 & \textbf{0.122} & --- & --- \\
+        \midrule
+        \multicolumn{5}{l}{\textit{Effect sizes and Bayesian analysis (9K POPE):}} \\
+        \midrule
+        Cohen's $h$ (accuracy / yes-ratio) & \multicolumn{4}{c}{0.007 / 0.049} \\
+        Post-hoc power (accuracy) & \multicolumn{4}{c}{6.8\%; $N$ for 80\% power $\approx$ 325{,}000} \\
+        Bayesian $P(\text{VIAR} > \text{base})$: acc.\ / yes-ratio & \multicolumn{4}{c}{67.8\% / 99.95\%} \\
+        95\% credible interval: acc.\ / yes-ratio & \multicolumn{4}{c}{$[-0.008, +0.013]$ / $[+0.010, +0.038]$} \\
         \bottomrule
     \end{tabular}%
     }
 \end{table}
-
-\begin{figure}[t]
-    \centering
-    \includegraphics[width=0.9\textwidth]{../figures/fig9_calibration_ece.pdf}
-    \caption{\textbf{Reliability diagrams} for baseline and \method{} on POPE (500 samples). Each bar shows the fraction of positive outcomes per confidence bin; numbers above bars indicate sample counts. The dashed diagonal represents perfect calibration. \method{} shifts samples from high-confidence bins into moderate-confidence bins, reflecting increased uncertainty on borderline cases.}
-    \label{fig:calibration}
-\end{figure}
-
-\subsection{Mechanistic Verification}
-\label{sec:mechanistic}
-
-To confirm that \method{} operates as intended, we measure the change in visual attention fraction ($\Delta \visFrac{}$) at every layer when the intervention is applied to layers 8--16 (Figure~\ref{fig:mechanistic}).
-
-The results reveal three properties. First, target layers show a consistent increase of $+0.003$ to $+0.005$ in visual attention fraction, confirming that the bias successfully redirects attention toward visual tokens. Second, non-target layers (0--7 and 18--30) show $\Delta \visFrac{} \approx 0$, indicating no unintended attention spillover. Third, layer~17 (immediately after the target range) shows a slight compensatory decrease of approximately $-0.005$, suggesting local redistribution. Notably, layer~31 shows $\Delta \visFrac{} = 0.000$ when \method{} targets layers 8--16, confirming that the intervention's effects are spatially localized.
-
-\begin{figure}[t]
-    \centering
-    \includegraphics[width=0.8\textwidth]{../figures/fig3_mechanistic.pdf}
-    \caption{\textbf{Mechanistic verification.} Change in visual attention fraction ($\Delta$\visFrac{}) per layer when \method{} is applied to layers 8--16. The intervention increases visual attention within the target range (+0.003 to +0.005) with no spillover to non-target layers and a slight compensatory decrease at layer 17.}
-    \label{fig:mechanistic}
-\end{figure}
-
-\subsection{Decomposed Attention Analysis}
-\label{sec:decomposed}
-
-A potential concern with the aggregate $\visFrac{}$ metric (Eq.~\ref{eq:visfrac}) is that it includes visual-query$\to$visual-key attention, which is structurally close to 1.0 in causal decoders (visual tokens, appearing first, have no text tokens to attend to). To address this, we compute the decomposed text$\to$vis metric (Eq.~\ref{eq:decomposed}) across all 32 layers on 200 POPE samples.
-
-Figure~\ref{fig:decomposed} (a) shows that the U-shaped pattern persists clearly in the text$\to$vis fraction alone. The neglect zone layers (8--16) show depressed text$\to$vis attention (mean 0.839, minimum 0.827 at layer~15) compared to early layers (mean 0.886 for layers 2--7) and late layers (mean 0.911 for layers 17--30). Layer~31 drops further to 0.808, confirming the final-layer anomaly. As expected, visual-query$\to$text-key attention is effectively zero across all layers (causal mask constraint), and visual-query$\to$visual-key attention is uniformly~1.0.
-
-Figure~\ref{fig:decomposed} (b) shows per-head variability: the standard deviation of visual attention fraction across the 32 attention heads peaks at layer~31 (0.009) and in the neglect zone (0.004--0.006), indicating that the neglect pattern is not uniform across heads but rather reflects a mixture of visually attentive and visually neglectful heads. Attention entropy also peaks in the neglect zone, suggesting more diffuse (less focused) attention distributions in these layers.
-
-\begin{figure}[t]
-    \centering
-    \includegraphics[width=\textwidth]{../figures/fig7_decomposed_attention.pdf}
-    \caption{\textbf{Decomposed attention analysis} (200 POPE samples). (a) The text$\to$vis fraction (Eq.~\ref{eq:decomposed}) confirms the U-shaped neglect zone independently of structural causal-mask effects. The shaded region marks layers 8--16. (b) Per-head variability (std of vis\_frac across 32 heads) and attention entropy both peak in the neglect zone, indicating heterogeneous and diffuse attention patterns.}
-    \label{fig:decomposed}
-\end{figure}
-
-\subsection{Head-Level Analysis}
-\label{sec:head_analysis}
-
-To determine whether the neglect zone reflects uniform depression across attention heads or is driven by a subset of ``visual neglect heads,'' we compute the full $32 \times 32$ (layer $\times$ head) text$\to$vis attention matrix on 150 POPE samples (Figure~\ref{fig:head_heatmap}).
-
-The analysis reveals several findings. First, within the neglect zone (layers 8--16), visual attention is depressed relatively uniformly across heads: the inter-head standard deviation is 0.037, compared to 0.118 globally, indicating that the neglect is a \emph{layer-level} phenomenon rather than a head-specific one. Second, the most extreme per-head variation occurs at layers 0--1 and layer 31. Layer~1 is anomalously low overall (mean text$\to$vis = 0.552), and layer~31 exhibits the highest head-to-head variance ($\sigma = 0.202$), suggesting a mixture of functionally distinct heads at the final layer. Third, ``visual specialist'' heads (text$\to$vis $> \mu + \sigma$) are concentrated in early and late layers (layers 3, 5--7, 20--25), while ``visual neglect'' heads (text$\to$vis $< \mu - \sigma$) cluster in layers 0--1, consistent with the overall U-shape.
-
-The uniformity of neglect within the zone has implications for intervention design: since the depression is not driven by a small number of outlier heads, the uniform additive bias in Eq.~\ref{eq:viar} is well-matched to the phenomenon. Head-selective interventions would be unnecessary and potentially counterproductive.
-
-\begin{figure}[t]
-    \centering
-    \includegraphics[width=\textwidth]{../figures/fig10_head_level_heatmap.pdf}
-    \caption{\textbf{Head-level attention analysis} (150 POPE samples). (a) Full $32 \times 32$ text$\to$vis fraction matrix. The neglect zone (dashed red, layers 8--16) shows uniformly depressed visual attention across heads, while layer~31 (purple) exhibits high inter-head variance. (b) Layer means with head-level standard deviation bars. The U-shape is visible in the layer means, with the neglect zone and layer-31 anomaly clearly delineated.}
-    \label{fig:head_heatmap}
-\end{figure}
-
-\subsection{Cross-Prompt Consistency}
-\label{sec:cross_prompt}
-
-To test whether the visual neglect zone is a stable model property or a prompt-dependent artifact, we measure the text$\to$vis attention fraction on three distinct prompt types using the same model: (1) POPE yes/no questions, (2) MMStar multiple-choice questions, and (3) open-ended captioning (``Describe this image briefly.''), each evaluated on 100 samples.
-
-Figure~\ref{fig:cross_prompt} shows that all three prompt types exhibit the same U-shaped pattern with the layer-31 crash. The neglect zone is most pronounced for MMStar (mean text$\to$vis = 0.767 in layers 8--16), moderate for POPE (0.839), and mildest for captioning (0.889). This ordering is interpretable: MMStar's longer, more complex prompts shift more text-query attention toward text tokens, amplifying the relative visual neglect. The critical observation is that the \emph{shape} of the curve---the location and relative depth of the neglect zone---is consistent across all prompt types, confirming that visual neglect is a structural model property rather than a prompt artifact.
-
-\begin{figure}[t]
-    \centering
-    \includegraphics[width=0.85\textwidth]{../figures/fig8_cross_prompt_consistency.pdf}
-    \caption{\textbf{Cross-prompt consistency of the visual neglect zone.} The text$\to$vis attention fraction (Eq.~\ref{eq:decomposed}) follows the same U-shaped pattern across three distinct prompt types: POPE (yes/no), MMStar (multiple-choice), and open captioning. The neglect zone location (layers 8--16) and layer-31 anomaly are invariant to prompt structure, confirming visual neglect is a model property.}
-    \label{fig:cross_prompt}
-\end{figure}
-
-\subsection{Threshold-Shift Analysis}
-\label{sec:threshold}
-
-A natural question is whether \method{}'s effect reduces to simple threshold tuning: does adding a constant to attention masks at visual positions do anything beyond biasing the model's yes/no decision boundary? To address this, we compare \method{} against a \emph{logit bias baseline} on the full POPE dataset (9{,}000 samples). The logit bias baseline adds a scalar bias $\beta$ directly to the ``yes'' token logit before the argmax decision, sweeping $\beta \in [0.0, 6.0]$ in increments of 0.25. This creates a yes-ratio vs.\ accuracy curve that represents the \emph{best possible performance achievable by pure threshold tuning} at each yes-ratio.
-
-Figure~\ref{fig:threshold} (a) shows the result. At \method{}'s achieved yes-ratio of 40.4\%, the logit bias baseline achieves 85.3\% accuracy, compared to \method{}'s 84.8\%. The logit bias curve peaks at 86.6\% (bias = 1.25, yes-ratio $\approx$ 48.8\%). In short, \method{} does not outperform threshold tuning at any matched yes-ratio---its effect is largely equivalent to shifting the decision boundary.
-
-We report this honestly as it constrains the interpretation of \method{}: the attention-level intervention does not induce a qualitatively different decision process from logit-level manipulation. However, this finding does \emph{not} undermine the diagnostic contribution. The key observation is that the \emph{direction} of the shift (toward increased ``yes'' responses) is correctly predicted by the neglect zone analysis: layers 8--16 under-weight visual tokens, and boosting their attention weight produces the same behavioral signature as directly biasing toward positive recognition. The neglect zone thus identifies the \emph{mechanism} underlying the model's conservative bias, even though the downstream behavioral correction is achievable through simpler means.
-
-Figure~\ref{fig:threshold} (b) shows the per-sample logit attribution: \method{} increases yes-propensity (mean $\Delta = +0.235$) with a slight bias toward low-confidence samples (mean $\Delta = 0.282$ for $|\Delta_{\text{logit}}| < 2$ vs.\ $0.211$ for medium-confidence), though the correlation is weak ($r = -0.060$).
-
-\begin{figure}[t]
-    \centering
-    \includegraphics[width=\textwidth]{../figures/fig11_threshold_comparison.pdf}
-    \caption{\textbf{Threshold-shift analysis} (9{,}000 POPE samples). (a) \method{}'s accuracy at its achieved yes-ratio falls on or below the logit bias baseline curve, indicating that the behavioral effect is equivalent to threshold tuning. The key diagnostic insight is that the direction of the shift is predicted by the neglect zone analysis. (b) Per-sample logit attribution by baseline confidence level.}
-    \label{fig:threshold}
-\end{figure}
 
 \subsection{Cross-Architecture Analysis}
 \label{sec:cross_arch}
 
-To test whether the visual neglect zone generalizes beyond the original LLaVA-1.5-7B model, we profile the text$\to$vis attention fraction across all 32 layers for four architectures on 200 POPE samples each: (1)~LLaVA-1.5-7B (Vicuna-7B backbone, direct projection, 576 visual tokens), (2)~LLaVA-NeXT-Mistral-7B (Mistral-7B backbone, direct projection), (3)~InstructBLIP-Vicuna-7B (Vicuna-7B backbone, Q-Former, 32 query tokens), and (4)~Qwen2-VL-7B (Qwen2 backbone, alternative architecture with multi-resolution rotary position embeddings). Figure~\ref{fig:cross_arch} presents the results.
+To test whether the visual neglect zone generalizes beyond LLaVA-1.5-7B, we profile the text$\to$vis attention fraction across all 32 layers for four architectures on 200 POPE samples each: (1)~LLaVA-1.5-7B (Vicuna backbone, direct projection, 576 visual tokens), (2)~LLaVA-NeXT-Mistral-7B (Mistral backbone, direct projection), (3)~InstructBLIP-Vicuna-7B (Q-Former, 32 query tokens), and (4)~Qwen2-VL-7B (multi-resolution rotary position embeddings). Figure~\ref{fig:cross_arch} presents the results.
 
-\paragraph{Direct-projection models share the U-shape.} The most striking finding is the strong correspondence between the two direct-projection models despite their different language model backbones. LLaVA-NeXT-Mistral-7B exhibits a clear U-shaped neglect zone spanning layers 10--16, with a mean text$\to$vis fraction of 0.506 in this range. Layer~31 shows the same crash behavior observed in the Vicuna variant, dropping to 0.339. The Pearson correlation between the two 32-layer profiles is $r = 0.699$ ($p < 0.001$), indicating that the U-shape is a structural property of the direct-projection architecture independent of the language model backbone. The neglect zone boundaries differ slightly (layers 8--16 for Vicuna, layers 10--16 for Mistral), reflecting backbone-specific processing dynamics, but the qualitative pattern, including the layer-31 crash, is conserved.
+The most striking finding is the strong correspondence between the two direct-projection models despite their different language model backbones. LLaVA-NeXT-Mistral-7B exhibits a clear U-shaped neglect zone spanning layers 10--16, with a mean text$\to$vis fraction of 0.506. Layer~31 shows the same crash behavior, dropping to 0.339. The Pearson correlation between the two 32-layer profiles is $r = 0.699$ ($p < 0.001$). InstructBLIP-Vicuna-7B, which interposes a Q-Former that compresses visual information into 32 learnable query tokens, shows a qualitatively different profile: the characteristic mid-layer depression is absent, and layer~31 is the \emph{highest} attention layer (0.850) rather than the lowest. Qwen2-VL-7B's architecture produces extremely low and flat text$\to$vis values (${\sim}0.0003$), reflecting its use of mrope for cross-modal position encoding rather than raw attention weights.
 
-\paragraph{Q-Former eliminates the U-shape.} InstructBLIP-Vicuna-7B, which interposes a Q-Former module that compresses visual information into 32 learnable query tokens ($18\times$ reduction from LLaVA's 576 tokens), shows a qualitatively different profile. The characteristic mid-layer depression is absent; instead, InstructBLIP shows depressed visual attention in early layers (0--2, mean 0.604) with a gradually increasing profile through middle and late layers. Layer~31 exhibits the opposite behavior from the direct-projection models: it is the \emph{highest} attention layer (0.850) rather than the lowest. The correlation with LLaVA-Vicuna is weak ($r = 0.362$), and the correlation with LLaVA-Mistral is essentially zero ($r = -0.005$).
-
-\paragraph{Qwen2-VL: metric incomparability.} Qwen2-VL-7B employs a fundamentally different architecture with multi-resolution rotary position embeddings (mrope) and a distinct visual token handling strategy. The measured text$\to$vis attention values are extremely low (${\sim}0.0003$) and flat across layers, indicating that our attention-based metric captures a qualitatively different quantity for this architecture. The very low absolute values likely reflect Qwen2-VL's use of mrope to encode positional relationships between modalities, which distributes cross-modal information flow across the position encoding rather than through raw attention weights. We include Qwen2-VL for completeness but do not draw conclusions about neglect zone presence or absence from these measurements.
-
-\paragraph{Architectural implications.} These cross-architecture results have three implications. First, the visual neglect zone as characterized in this paper is a structural property of direct-projection VLM architectures, conserved across language model backbones (Vicuna and Mistral, $r{=}0.70$). Second, the Q-Former's intermediate processing stage appears to mitigate the neglect pattern entirely, likely because it pre-processes visual information through cross-attention with learned queries, producing tokens that are already semantically aligned with the language model's representation space. Third, different visual-token integration strategies (direct projection, Q-Former, mrope) produce qualitatively different attention dynamics, suggesting that architectural choices strongly shape cross-modal information flow at the mechanistic level.
+These results establish the visual neglect zone as a structural property of direct-projection architectures, conserved across language model backbones ($r{=}0.70$) but absent in Q-Former and alternative designs. The Q-Former's intermediate processing appears to mitigate the neglect pattern entirely.
 
 \begin{figure}[t]
     \centering
     \includegraphics[width=\textwidth]{../figures/fig12_cross_architecture.pdf}
-    \caption{\textbf{Cross-architecture attention profiles} (200 POPE samples each). (a)~Direct-projection models (LLaVA-Vicuna and LLaVA-Mistral) both exhibit the U-shaped neglect zone with layer-31 crash ($r{=}0.70$). (b)~InstructBLIP-Vicuna (Q-Former, 32 query tokens) shows no U-shape, with early-layer depression and elevated layer-31 attention. (c)~Normalized overlay of all profiles for shape comparison. (d)~Pairwise correlation matrix: direct-projection models are strongly correlated ($r{=}0.70$); Q-Former and alternative architectures show weak or no correlation with the direct-projection pattern.}
+    \caption{\textbf{Cross-architecture attention profiles} (200 POPE samples each). (a)~Direct-projection models (LLaVA-Vicuna and LLaVA-Mistral) both exhibit the U-shaped neglect zone with layer-31 crash ($r{=}0.70$). (b)~InstructBLIP (Q-Former) shows no U-shape. (c)~Normalized overlay. (d)~Pairwise correlation matrix.}
     \label{fig:cross_arch}
 \end{figure}
 
 \subsection{Language Prior Collapse: Hidden-State Analysis}
 \label{sec:collapse}
 
-The attention-based analyses in the preceding sections characterize \emph{where} the model directs its attention but leave open the question of \emph{what} the model computes at each layer. To address this, we conduct a hidden-state probing experiment that directly measures how much visual information influences the model's internal representations at each layer.
+To move beyond attention analysis and examine what the model computes at each layer, we conduct a hidden-state probing experiment. We process 200 POPE samples through LLaVA-1.5-7B twice: once with the real image and once with a black (null) image, keeping the text prompt identical. At each layer, we extract hidden states at text-token positions and compute the residual update cosine similarity, which compares only the incremental update added by each layer, isolating the per-layer contribution.
 
-\paragraph{Experimental setup.} We process 200 POPE samples through LLaVA-1.5-7B twice: once with the real image and once with a black (null) image, keeping the text prompt identical. At each layer, we extract the hidden states at text-token positions and compute two metrics: (1)~the raw cosine similarity between text-token hidden states from the real-image and black-image forward passes, measuring how much the overall text representation depends on image content; and (2)~the residual update cosine similarity, which compares only the incremental update added by each layer (i.e., the difference between the layer's output and input), isolating the per-layer contribution.
+Early layers (L2--7) show moderately image-dependent updates ($\bar{s} = 0.819$). The neglect zone (L8--16) shows intermediate behavior ($\bar{s} = 0.699$). Late layers (L17--30) show the most image-dependent updates ($\bar{s} = 0.655$), consistent with active re-engagement with visual information. Layer~31 is the critical finding: its residual update achieves the highest similarity of any layer ($s = 0.922$), meaning that layer~31's computation is nearly identical regardless of whether the model is processing a real image or a black image. This is definitive evidence that layer~31 functions as a near-pure language prior readout layer.
 
-\paragraph{Raw cosine similarity reveals a collapse-recovery pattern.} The raw cosine similarity between text-token hidden states (real vs.\ black image) exhibits a distinctive trajectory across layers (Figure~\ref{fig:collapse}a). Early layers (L2--7) show moderate similarity ($\bar{s} = 0.835$) that decreases as visual information is progressively integrated into the text representations. Through the neglect zone (L8--16), similarity continues declining but more slowly ($\bar{s} = 0.785$), consistent with reduced but nonzero visual integration. Late layers (L17--30) reach the lowest similarity ($\bar{s} = 0.778$), indicating maximal divergence from the null-image trajectory and hence maximal visual dependence. Critically, layer~31 exhibits a sharp recovery to $s = 0.832$, indicating that the final layer's output moves \emph{back toward} the null-image representation, as if the model partially ``forgets'' the visual input in its final computation.
-
-\paragraph{Residual update similarity provides definitive evidence.} The residual update cosine similarity (Figure~\ref{fig:collapse}b) is more revealing because it isolates what each layer contributes independently of accumulated information. Early layers (L2--7) show moderately image-dependent updates ($\bar{s} = 0.819$). The neglect zone (L8--16) shows intermediate behavior ($\bar{s} = 0.699$), with per-layer updates that are neither fully image-dependent nor fully image-independent. Late layers (L17--30) show the most image-dependent updates ($\bar{s} = 0.655$), consistent with active re-engagement with visual information. Layer~31 is the critical finding: its residual update achieves the highest similarity of any layer ($s = 0.922$), meaning that the computation performed by layer~31 is nearly identical regardless of whether the model is processing a real image or a black image. This is definitive evidence that layer~31 functions as a near-pure language prior readout layer: its per-layer contribution is essentially image-independent.
-
-\paragraph{Visual token norms.} Figure~\ref{fig:collapse} (c) shows the difference in visual token norms between real and black image conditions. The difference is negative in early and middle layers (black-image visual tokens have larger norms, likely due to the absence of structured visual features creating an information vacuum that is compensated by larger residual updates) and transitions to positive in late layers. Layer~31 shows a large positive difference (+18.4), indicating that the model produces substantially different visual-token representations at the final layer depending on image content, even though the \emph{text-token} computations at this layer are image-independent. This decoupling between visual-token and text-token processing at layer~31 further supports the language-prior readout interpretation: the model's decision-making computation at the final layer attends primarily to language priors, not to the visual representations it has constructed.
+Additionally, the raw cosine similarity between text-token hidden states (real vs.\ null image) shows a sharp recovery at layer~31 ($s = 0.832$), and visual token norm differences transition to a large positive value at layer~31 (+18.4), indicating decoupled visual-token and text-token processing (Figure~\ref{fig:collapse}). Full analysis details are in Supplementary Section~D.
 
 \begin{figure}[t]
     \centering
     \includegraphics[width=\textwidth]{../figures/fig13_language_prior_collapse.pdf}
-    \caption{\textbf{Language prior collapse analysis} (200 POPE samples, LLaVA-1.5-7B). Hidden states at text-token positions are compared between real-image and black-image (null) forward passes. (a)~Raw cosine similarity shows progressive divergence from the null trajectory, with a sharp recovery at layer~31. (b)~Residual update cosine similarity isolates per-layer contributions: layer~31's update is nearly identical regardless of image content ($s{=}0.922$), establishing it as a language prior readout. (c)~Visual token norm difference (real $-$ black) transitions from negative (early/mid layers) to large positive at layer~31 (+18.4).}
+    \caption{\textbf{Language prior collapse analysis} (200 POPE samples, LLaVA-1.5-7B). Hidden states at text-token positions compared between real-image and null-image (black) forward passes. (a)~Raw cosine similarity with sharp recovery at layer~31. (b)~Residual update cosine similarity: layer~31's update is near-identical regardless of image content ($s{=}0.922$). (c)~Visual token norm difference (real~$-$~black) transitions to +18.4 at layer~31.}
     \label{fig:collapse}
 \end{figure}
 
 \subsection{Gradient Attribution of Visual Information}
 \label{sec:gradient}
 
-To complement the forward-pass analyses (attention patterns and hidden-state similarity), we provide a backward-pass validation through gradient attribution. This analysis asks: how much does each layer's representation of visual tokens contribute to the model's final prediction?
+To complement forward-pass analyses, we provide backward-pass validation through gradient attribution. For 100 POPE samples, we compute the gradient of the yes-token logit with respect to hidden states at visual-token positions at each layer. Early layers (L2--7) show the highest gradient norms (mean 0.00803). The neglect zone (L8--16) shows a 57\% reduction (mean 0.00346), and late layers (L17--30) show a 90\% reduction (mean 0.00082). Layer~31 has effectively zero gradient signal, consistent with language prior readout.
 
-\paragraph{Experimental setup.} For 100 POPE samples, we compute the gradient of the yes-token logit with respect to the hidden states at visual-token positions at each layer. The gradient norm at layer $l$, averaged across visual positions and samples, quantifies how sensitive the model's prediction is to perturbations of the visual representation at that layer.
-
-\paragraph{Monotone decay with steeper-than-baseline drop in the neglect zone.} The gradient visual importance shows a monotone decay across layers (Figure~\ref{fig:gradient}), which is expected in deep networks due to gradient attenuation through successive nonlinear transformations. Early layers (L2--7) show the highest gradient norms (mean 0.00803), indicating that perturbations to visual representations at these layers have the largest impact on the final prediction. The neglect zone (L8--16) shows a 57\% reduction (mean 0.00346), and late layers (L17--30) show a 90\% reduction from early layers (mean 0.00082). Layer~31 has effectively zero gradient signal, consistent with the residual update analysis showing that this layer's computation is image-independent.
-
-The key finding is not the monotone decay itself (which is a generic property of deep networks) but rather the \emph{rate} of decay through the neglect zone. The gradient norm drops by a factor of approximately 5$\times$ from layer 8 to layer 16, a steeper decline than the baseline decay rate established by the early-to-late gradient envelope. This provides independent gradient-based evidence that visual representations become disproportionately less behaviorally relevant specifically in the neglect zone layers, converging with the attention-based and hidden-state analyses.
+The key finding is that the gradient norm drops by a factor of approximately 5$\times$ from layer 8 to layer 16, a steeper decline than the baseline decay rate established by the early-to-late gradient envelope. This provides independent gradient-based evidence that visual representations become disproportionately less behaviorally relevant specifically in the neglect zone layers (Figure~\ref{fig:gradient}).
 
 \begin{figure}[t]
     \centering
-    \includegraphics[width=0.75\textwidth]{../figures/fig14_gradient_attribution.pdf}
-    \caption{\textbf{Gradient attribution of visual information} (100 POPE samples, LLaVA-1.5-7B). Gradient norm of the yes-token logit with respect to hidden states at visual positions, averaged across samples. The monotone decay is expected in deep networks, but the 5$\times$ drop specifically through the neglect zone (L8--16, shaded) is steeper than the baseline decay rate, providing independent evidence that visual representations lose behavioral relevance in the neglect zone. Layer~31 has zero gradient signal, consistent with language prior readout.}
+    \includegraphics[width=0.7\textwidth]{../figures/fig14_gradient_attribution.pdf}
+    \caption{\textbf{Gradient attribution of visual information} (100 POPE samples, LLaVA-1.5-7B). Gradient norm of the yes-token logit w.r.t.\ hidden states at visual positions. The 5$\times$ drop through the neglect zone (L8--16, shaded) exceeds the baseline decay rate. Layer~31 has zero gradient signal.}
     \label{fig:gradient}
 \end{figure}
 
-\subsection{Per-Sample Neglect-Hallucination Correlation}
-\label{sec:persample}
-
-The preceding analyses establish the neglect zone as a model-level structural regularity. A natural question is whether the degree of visual neglect varies across individual samples and, if so, whether samples with deeper neglect are more likely to hallucinate. We address this through a per-sample correlation analysis.
-
-\paragraph{Experimental setup.} For 500 POPE samples, we compute the per-sample text$\to$vis attention depth in the neglect zone (L8--16), defined as the mean text$\to$vis attention fraction across these layers for each individual sample. We then correlate this per-sample neglect depth with prediction correctness (binary: correct/incorrect).
-
-\paragraph{Aggregate neglect depth does not predict individual hallucinations.} The overall Pearson correlation between neglect-zone attention depth and correctness is $r = -0.023$ ($p = 0.615$), indicating no significant per-sample relationship (Figure~\ref{fig:persample}). Cohen's $d$ for the difference in neglect depth between correct and incorrect predictions is $-0.061$, a very small effect. This result is interpretable: the neglect zone is a structural property of the model's computation, not a sample-varying phenomenon. All samples pass through the same attention architecture, and the neglect zone depth varies only modestly across inputs.
-
-\paragraph{Transition layers show significant per-sample effects.} A more fine-grained per-layer analysis reveals a nuanced picture. While most individual layers show no significant correlation with correctness, the layers at the \emph{boundary} of the neglect zone exhibit significant per-sample effects (Figure~\ref{fig:persample}a): layer~14 ($r = -0.154$, $p = 0.0005$), layer~15 ($r = -0.142$, $p = 0.0015$), layer~16 ($r = -0.093$, $p = 0.037$), and layer~17 ($r = -0.140$, $p = 0.0017$). Additionally, layer~30 shows a significant correlation ($r = -0.119$, $p = 0.0076$). All significant correlations are negative, meaning that lower text$\to$vis attention at these specific layers is associated with incorrect predictions.
-
-\paragraph{Interpretation.} The concentration of significant per-sample effects at layers 14--17, the transition from the neglect zone to the late-layer recovery region, has a clear mechanistic interpretation. The neglect zone is a model-level structural regularity: all samples experience reduced visual attention in layers 8--16. However, individual samples differ in how effectively the model \emph{exits} the neglect zone and re-engages visual information. Layers 14--17 represent this critical transition, and samples that fail to adequately re-engage visual tokens at these layers are more likely to produce incorrect predictions. This finding bridges the model-level and sample-level perspectives: the neglect zone is a structural regularity, but individual-sample hallucination vulnerability manifests at the zone's boundary, where the model ``decides'' whether to re-engage visual information for each specific input.
-
-\begin{figure}[t]
-    \centering
-    \includegraphics[width=\textwidth]{../figures/fig15_persample_correlation.pdf}
-    \caption{\textbf{Per-sample neglect-hallucination correlation} (500 POPE samples, LLaVA-1.5-7B). (a)~Per-layer Pearson correlation between text$\to$vis attention and prediction correctness. Significant negative correlations ($*$: $p{<}0.05$, $**$: $p{<}0.01$, $***$: $p{<}0.001$) cluster at the neglect zone boundary (layers 14--17), where lower visual attention predicts incorrect predictions. (b)~Violin plot of neglect-zone aggregate attention depth for correct vs.\ incorrect predictions (Cohen's $d{=}-0.061$), confirming that the aggregate neglect depth is a model-level property, not a per-sample predictor.}
-    \label{fig:persample}
-\end{figure}
-
-\subsection{Ablation Studies}
-\label{sec:ablations}
-
-\paragraph{Adaptive scaling alternatives.} We compare five strategies for computing per-layer bias: uniform, linear (Eq.~\ref{eq:adaptive}), quadratic, binary (below-median only), inverse-rank, and entropy-based. Results on a 200-sample MMStar subset are reported in Table~\ref{tab:adaptive}. Linear, quadratic, and binary strategies all achieve 50.5\%, while entropy-based is worst at 47.0\%. We select the linear strategy as the simplest principled approach.
-
-\begin{table}[t]
-    \centering
-    \caption{\textbf{Adaptive scaling alternatives} on a 200-sample MMStar subset. Linear, quadratic, and binary perform equally; entropy-based is worst. We adopt the linear strategy (Eq.~\ref{eq:adaptive}) for its simplicity.}
-    \label{tab:adaptive}
-    \begin{tabular}{lc}
-        \toprule
-        Scaling Strategy & MMStar Accuracy \\
-        \midrule
-        Baseline (no intervention) & 48.0\% \\
-        Uniform (L8--16) & 49.5\% \\
-        Linear (Eq.~\ref{eq:adaptive}) & \textbf{50.5\%} \\
-        Quadratic & \textbf{50.5\%} \\
-        Binary (below-median) & \textbf{50.5\%} \\
-        Inverse-rank & 48.5\% \\
-        Entropy-based & 47.0\% \\
-        \bottomrule
-    \end{tabular}
-\end{table}
-
-\begin{figure}[t]
-    \centering
-    \begin{subfigure}[b]{0.48\textwidth}
-        \centering
-        \includegraphics[width=\textwidth]{../figures/fig4_adaptive.pdf}
-        \caption{Adaptive scaling strategies}
-        \label{fig:adaptive}
-    \end{subfigure}
-    \hfill
-    \begin{subfigure}[b]{0.48\textwidth}
-        \centering
-        \includegraphics[width=\textwidth]{../figures/fig6_bias_sweep.pdf}
-        \caption{Bias magnitude sweep}
-        \label{fig:bias_sweep}
-    \end{subfigure}
-    \caption{\textbf{Ablation studies.} (a) Comparison of adaptive scaling strategies on MMStar (200 samples). Linear, quadratic, and binary achieve equivalent performance. (b) Bias magnitude sweep on POPE and MMStar (200 samples each). An inverted-U relationship shows optimal bias at $b{=}2.0$ for POPE and $b{=}1.0$ for MMStar, with performance collapse at $b \geq 5$.}
-    \label{fig:ablations}
-\end{figure}
-
-\paragraph{Bias magnitude sweep.} Figure~\ref{fig:bias_sweep} shows the effect of bias magnitude $b$ on POPE and MMStar (200 samples each). Both benchmarks exhibit an inverted-U relationship: too little bias has negligible effect, while excessive bias ($b \geq 5$) collapses attention onto visual tokens and degrades performance (72.0\% on POPE). The optimal bias is $b = 2.0$ for POPE and $b = 1.0$ for MMStar. The sharper decline on POPE (binary classification) compared to MMStar (multiple choice) suggests that binary decisions are more sensitive to attention distribution shifts.
-
-\paragraph{Layer ablation.} We test eight layer configurations on POPE and MMStar (200 samples each). Applying \method{} to the full neglect zone (layers 8--16) performs best on POPE (84.5\%), while the adaptive variant performs best on MMStar (50.5\%). Applying to all 32 layers or restricting to only early or late layers performs worse, confirming that the intervention is effective specifically in the neglect zone (Table~\ref{tab:layer_ablation}).
-
-\begin{table}[t]
-    \centering
-    \caption{\textbf{Layer ablation} on 200-sample subsets. The neglect zone configuration (L8--16) is best for POPE; adaptive is best for MMStar. Intervening on all layers or non-neglect layers is harmful.}
-    \label{tab:layer_ablation}
-    \begin{tabular}{lcc}
-        \toprule
-        Layer Configuration & POPE Acc. & MMStar Acc. \\
-        \midrule
-        Baseline (no intervention) & 82.5\% & 48.0\% \\
-        All layers (L0--31) & 78.0\% & 46.5\% \\
-        Early only (L0--7) & 81.0\% & 47.5\% \\
-        Late only (L17--31) & 82.0\% & 47.0\% \\
-        Neglect zone (L8--16) & \textbf{84.5\%} & 49.5\% \\
-        Adaptive (Eq.~\ref{eq:adaptive}) & 83.5\% & \textbf{50.5\%} \\
-        Layer 31 only & 82.5\% & 48.0\% \\
-        Neglect + Layer 31 & 84.0\% & 49.0\% \\
-        \bottomrule
-    \end{tabular}
-\end{table}
+\paragraph{Additional experiments.} We additionally conduct per-sample neglect-hallucination correlation analysis, finding that aggregate neglect depth does not predict individual hallucinations ($r = -0.023$, $p = 0.615$), but significant correlations emerge at the neglect zone boundary (layers 14--17, $p < 0.002$), suggesting that individual hallucination vulnerability manifests at the transition out of the neglect zone. Full results on GQA, HallusionBench, decomposed attention, head-level analysis, cross-prompt consistency, threshold-shift analysis, ablation studies, and qualitative analysis are in the supplementary material (Sections~A--L).
 
 %==============================================================================
 % 5. DISCUSSION
@@ -548,80 +305,20 @@ The preceding analyses establish the neglect zone as a model-level structural re
 \section{Discussion}
 \label{sec:discussion}
 
-\subsection{Interpreting the Visual Neglect Zone}
+\paragraph{Interpreting the visual neglect zone.}
+The U-shaped visual attention pattern admits a functional interpretation consistent with findings in text-only transformers~\cite{clark2019what,olsson2022context,geva2023dissecting}. Early layers perform initial multimodal alignment. Middle layers shift toward abstract semantic processing, relying increasingly on language model priors and allocating less attention to raw visual features (the neglect zone). Late layers re-engage visual tokens for output generation. The conservation of this U-shape across language model backbones (Vicuna and Mistral, $r{=}0.70$) despite different pretraining data suggests that the neglect zone is an emergent consequence of the direct-projection architecture itself. Its absence in Q-Former-based models, where visual information is pre-processed through cross-attention with learned queries, further supports this interpretation.
 
-The U-shaped visual attention pattern across transformer layers admits a functional interpretation consistent with findings in text-only transformers~\cite{clark2019what,olsson2022context,geva2023dissecting}. Early layers perform initial multimodal alignment, establishing correspondences between visual and textual representations. Middle layers shift toward abstract semantic processing, during which the model relies increasingly on its language model priors and allocates less attention to raw visual features. This is the neglect zone. Late layers re-engage visual tokens as the model grounds its abstract representations back in the visual input for output generation. This interpretation is consistent with the staged processing view of transformer language models~\cite{elhage2021mathematical,meng2022locating}, extended to the multimodal setting.
+\paragraph{Language prior collapse at layer~31.}
+Layer~31 exhibits the sharpest visual attention drop in both direct-projection models, yet intervening on layer~31 alone has no measurable effect on performance. The hidden-state analysis provides a definitive explanation: with residual update cosine similarity of 0.922, layer~31 functions as a near-pure language prior readout whose computation is determined almost entirely by language context. The zero gradient signal independently confirms that perturbations to visual representations at this layer have no effect on predictions. The model constructs its final-token representation by integrating visual information through early and late layers, then projecting through a final layer that operates primarily on language-level features.
 
-The severity of the neglect zone in LLaVA-1.5-7B (visual attention dropping to 17.3\% in the most neglected layer) compared to LLaVA-1.6-Vicuna-7B (relatively milder neglect) aligns with the known performance gap between these models. The stronger model has learned, through improved training, to better maintain visual grounding throughout its processing pipeline. The conservation of the U-shape across language model backbones (Vicuna and Mistral, $r{=}0.70$) despite different pretraining data and model families suggests that the neglect zone is an emergent consequence of the direct-projection architecture itself, not of any particular language model's learned representations.
+\paragraph{Calibration versus accuracy.}
+The most striking result is the calibration effect on POPE. The baseline model's ``no'' bias (yes-ratio 42.8\%) is corrected to exactly 50.0\% by \method{}, with Bayesian analysis confirming this with 99.95\% posterior probability. The accuracy improvement remains ambiguous (67.8\% posterior probability; credible interval spanning zero). This asymmetry between the definitive calibration effect and the ambiguous accuracy effect is the central empirical finding of the intervention analysis. It connects to the broader calibration literature~\cite{guo2017calibration}: the visual neglect zone appears to cause systematic under-reliance on visual evidence, biasing the model toward conservative predictions.
 
-\subsection{Language Prior Collapse at Layer~31}
-\label{sec:layer31}
+\paragraph{When does VIAR help?}
+The intervention helps when the task requires discriminating based on visual evidence (binary or multiple-choice VQA), the model exhibits substantial visual neglect (LLaVA-1.5), the baseline has a conservative bias, and the bias magnitude is calibrated. \method{} does not help for open-ended generation (GQA), when the model already maintains adequate visual attention (LLaVA-1.6), when the baseline is already calibrated (HallusionBench), or when the bias is applied to non-neglect layers. This pattern of successes and failures provides evidence for the mechanistic account: the neglect zone is a real phenomenon with measurable behavioral consequences.
 
-Layer~31 exhibits the sharpest drop in visual attention fraction in both direct-projection models (14.1\% in LLaVA-1.5, approximately 45\% in LLaVA-1.6; 0.339 in LLaVA-Mistral). However, intervening on layer~31 alone has no measurable effect on POPE or MMStar performance. Moreover, when \method{} targets layers 8--16, the mechanistic analysis shows zero effect on layer~31 ($\Delta \visFrac{} = 0.000$). Our head-level analysis (Section~\ref{sec:head_analysis}) reveals that layer~31 has the highest inter-head variance ($\sigma = 0.202$), suggesting a mixture of functionally distinct heads rather than uniform behavior.
-
-The hidden-state analysis in Section~\ref{sec:collapse} provides definitive evidence for interpreting this anomaly. The residual update cosine similarity at layer~31 is 0.922, meaning that layer~31's computation is nearly identical regardless of whether the model processes a real image or a black image. This establishes that layer~31 functions as a \emph{language prior readout} layer: its contribution to the output representation is determined almost entirely by the language context, with minimal dependence on visual input. The zero gradient signal at layer~31 (Section~\ref{sec:gradient}) independently confirms that perturbations to visual representations at this layer have no effect on the model's prediction.
-
-This finding resolves the ambiguity among the previously proposed interpretations. Layer~31 is not merely a ``summary'' operation or an artifact of LM head initialization; it is performing a near-pure language-prior computation. The model effectively constructs its final-token representation by (1)~integrating visual information through early and late layers, and then (2)~projecting through a final layer that operates primarily on language-level features for next-token prediction. The behavioral inertness of layer-31 intervention is thus expected: modifying attention at a layer whose computation is image-independent cannot affect visual grounding.
-
-\subsection{Gradient-Based Validation}
-
-The gradient attribution analysis (Section~\ref{sec:gradient}) provides a third, independent line of evidence for the neglect zone. While the monotone decay of gradient norms across layers is a generic property of deep networks, the 5$\times$ acceleration of decay specifically through layers 8--16 exceeds what would be expected from gradient attenuation alone. This steeper-than-baseline decay indicates that the neglect zone is not merely a region of reduced attention but a region where visual information becomes disproportionately less relevant to the model's computation, as measured by the backward pass.
-
-The convergence of three independent methodologies (forward attention patterns, hidden-state similarity, and backward gradient attribution) on the same layers provides strong evidence that the neglect zone is a genuine mechanistic phenomenon rather than an artifact of any single measurement approach. Each methodology has known limitations (attention may not reflect information flow; cosine similarity is a coarse metric; gradient norms suffer from vanishing gradients), but their agreement substantially mitigates concerns about any individual limitation.
-
-\subsection{Per-Sample Effects at the Zone Boundary}
-
-The per-sample correlation analysis (Section~\ref{sec:persample}) adds an important nuance to the understanding of the neglect zone. The finding that aggregate neglect depth does not predict individual hallucinations ($r = -0.023$, $p = 0.615$) confirms that the neglect zone is a model-level structural regularity, not a per-sample varying phenomenon. However, the significant correlations at layers 14--17 ($p < 0.002$) reveal that the transition out of the neglect zone is where sample-level vulnerability manifests. This suggests that the neglect zone creates a ``risk window'' in the model's processing pipeline: all samples experience reduced visual attention in this region, but individual outcomes depend on how effectively the model re-engages visual tokens at the zone boundary. Future interventions might target these transition layers specifically rather than the entire neglect zone.
-
-\subsection{Calibration versus Accuracy}
-
-The most striking result is the calibration effect on POPE. The baseline model exhibits a systematic ``no'' bias (yes-ratio 42.8\%), which \method{} corrects to exactly 50.0\%. This correction is the dominant driver of the accuracy improvement: by reducing false negatives (missed ``yes'' answers), \method{} improves recall from 76.4\% to 84.4\%, exactly matching precision. In contrast, VCD overcorrects in the opposite direction (yes-ratio 62.2\%), improving recall at the expense of precision.
-
-This finding connects to the broader literature on neural network calibration~\cite{guo2017calibration}. The visual neglect zone appears to cause systematic under-reliance on visual evidence, biasing the model toward conservative (negative) predictions. Correcting this under-reliance restores calibrated uncertainty estimation, even when the accuracy improvement is modest. The Bayesian analysis (Section~\ref{sec:stats}) confirms this interpretation with strong quantitative support: the posterior probability of a real calibration effect is 99.95\%, with the 95\% credible interval for the yes-ratio shift lying entirely above zero ($[+0.010, +0.038]$). In contrast, the posterior probability for an accuracy improvement is only 67.8\%, with the credible interval spanning zero ($[-0.008, +0.013]$). This asymmetry between the definitive calibration effect and the ambiguous accuracy effect is the central empirical finding of the intervention analysis.
-
-\subsection{When Does VIAR Help?}
-
-Our results delineate clear conditions under which \method{} is effective. The intervention helps when: (1) the task requires discriminating between options based on visual evidence (binary or multiple-choice VQA), (2) the model exhibits substantial visual neglect (LLaVA-1.5 with its wider neglect zone), (3) the baseline exhibits a conservative (``no'') bias that can be corrected, and (4) the bias magnitude is appropriately calibrated (inverted-U response curve). \method{} does not help when: (1) the task requires open-ended generation (GQA), (2) the model already maintains adequate visual attention (LLaVA-1.6), (3) the baseline is already approximately calibrated (HallusionBench, where yes-ratio is 52.0\% at baseline), or (4) the bias is applied to non-neglect layers or set too high.
-
-This specificity is a feature, not a limitation, of the diagnostic framing. The pattern of conditions under which \method{} succeeds and fails provides evidence for the mechanistic account: the neglect zone is a real phenomenon with measurable behavioral consequences, rather than an artifact of our attention metric.
-
-\subsection{Comparison with VCD}
-
-\method{} and VCD represent fundamentally different approaches to improving visual grounding. VCD operates at the decoding level, contrasting output distributions with and without visual input, requiring a full additional forward pass. \method{} operates at the attention level, modifying how visual tokens are weighted within a single forward pass. This architectural difference explains their contrasting calibration profiles: VCD amplifies any visual signal (including noise), leading to overcorrection, while \method{}'s layer-targeted approach provides a more measured correction. The failure of the \method{}+VCD combination (Table~\ref{tab:pope}) further supports the interpretation that the two methods address overlapping rather than orthogonal failure modes.
-
-\subsection{Qualitative Analysis}
-\label{sec:qualitative}
-
-Per-sample analysis on POPE reveals that \method{} corrects 21 samples that the baseline misclassifies, while introducing 17 new errors---a net gain of 4. The corrected samples are predominantly false negatives: the baseline says ``no'' for objects that are present (e.g., ``Is there a car in the image?'' with baseline $p_\text{yes} = 0.19$, \method{} $p_\text{yes} = 0.39$). The introduced errors are predominantly false positives: \method{} shifts borderline ``no'' cases past the decision threshold (e.g., ``Is there a motorcycle in the image?'' with baseline $p_\text{yes} = 0.25$, \method{} $p_\text{yes} = 0.41$). This asymmetry is consistent with the calibration finding: \method{} systematically increases the model's propensity to affirm the presence of queried objects, correcting the baseline's conservative bias at the cost of occasional false affirmations.
-
-\subsection{Addressing Potential Concerns}
-
-We address several specific questions that arise from our analysis:
-
-\paragraph{How is attention fraction computed during inference?} The visual attention fraction (both aggregate and decomposed) is computed from a single forward pass on the full input prompt (system tokens + visual tokens + question tokens). No generation tokens are included; the metric reflects how the model distributes attention when encoding the input, not during autoregressive generation. This ensures the measurement is deterministic and independent of generated content.
-
-\paragraph{Does the U-shape persist across different tasks/prompts?} Yes. Section~\ref{sec:cross_prompt} demonstrates that the text$\to$vis U-shape and layer-31 anomaly are consistent across three distinct prompt types (binary yes/no, multiple choice, and open captioning), confirming the neglect zone is a model property rather than a prompt artifact.
-
-\paragraph{Can you provide a text-query-only version of the metric?} Yes. Section~\ref{sec:decomposed} introduces the decomposed metric (Eq.~\ref{eq:decomposed}), which restricts attention analysis to text-query$\to$visual-key pairs, explicitly excluding the structurally inflated visual-query$\to$visual-key attention. The U-shape persists in this decomposition.
-
-\paragraph{Do you see ECE/Brier improvements, not just yes-ratio shift?} The Brier score improves from 0.123 to 0.122 (Section~\ref{sec:stats}), a modest but directionally consistent improvement. ECE is comparable between methods (0.043 vs.\ 0.046). The dominant calibration effect is the yes-ratio correction, which is the most interpretable metric for a balanced binary benchmark.
-
-\paragraph{Is the neglect driven by specific ``neglect heads''?} No. Section~\ref{sec:head_analysis} presents a full $32 \times 32$ head-level analysis. Within the neglect zone (layers 8--16), the inter-head standard deviation is 0.037, compared to 0.118 globally. The neglect is a layer-level phenomenon, not a head-specific one. This justifies the uniform additive bias in Eq.~\ref{eq:viar}: head-selective interventions are unnecessary.
-
-\paragraph{Does the neglect zone generalize to non-LLaVA architectures?} The U-shaped neglect zone generalizes to other direct-projection architectures: LLaVA-NeXT-Mistral-7B (Mistral backbone) shows a closely correlated profile ($r{=}0.70$ with LLaVA-Vicuna). However, it does not generalize to Q-Former-based (InstructBLIP) or alternative architectures (Qwen2-VL), which show qualitatively different attention profiles (Section~\ref{sec:cross_arch}). This specificity strengthens rather than weakens the finding: the neglect zone is tied to the direct-projection design, not an artifact of the metric.
-
-\subsection{Limitations}
-\label{sec:limitations}
-
-We acknowledge several important limitations. First, and most fundamentally, attention weights are an imperfect proxy for information flow~\cite{jain2019attention,wiegreffe2019attention}. High attention to visual tokens does not guarantee that visual information is faithfully propagated through the residual stream, and low attention does not preclude information transfer via other pathways. We mitigate this concern through three independent validation methodologies (attention analysis, hidden-state probing, gradient attribution) that converge on the same conclusions, but a complete causal information-flow analysis using activation patching or distributed alignment search remains future work.
-
-Second, the accuracy improvement on POPE is not statistically significant ($p = 0.272$; Cohen's $h = 0.007$; post-hoc power 6.8\%), and achieving adequate power would require an infeasibly large sample size (${\sim}325{,}000$). The intervention should be understood as a proof-of-concept for the causal relevance of the neglect zone, not as a reliable performance enhancement.
-
-Third, the optimal bias magnitude and target layers require calibration per model, limiting plug-and-play applicability. Fourth, we have not investigated the neglect zone during training, where it may play a different or even beneficial role (for instance, enabling language priors to develop without visual interference).
-
-Fifth, our cross-architecture analysis now spans four models (two direct-projection, one Q-Former, one alternative), confirming that the U-shaped neglect zone is specific to direct-projection architectures. However, our coverage of direct-projection variants is limited to 7B-parameter models in the LLaVA family; whether the pattern holds for larger models (13B, 70B), other direct-projection architectures (Phi-Vision, Cambrian), or models with substantially different training procedures remains open. The Qwen2-VL metric incomparability issue (Section~\ref{sec:cross_arch}) highlights that our attention-based metric may not be suitable for all architectural designs, particularly those employing mrope or other non-standard positional encoding strategies for cross-modal integration.
-
-Sixth, the per-sample correlation analysis (Section~\ref{sec:persample}) shows that aggregate neglect depth does not predict individual hallucinations, limiting the practical utility of the neglect zone as a per-sample diagnostic. The significant correlations at boundary layers suggest a more complex story that warrants further investigation. Finally, our intervention shows no improvement on GQA (open-ended VQA), indicating that the neglect zone's behavioral relevance may be limited to constrained response formats.
+\paragraph{Limitations.}
+Attention weights are an imperfect proxy for information flow~\cite{jain2019attention,wiegreffe2019attention}, though convergence of three independent methodologies mitigates this concern. The accuracy improvement is not statistically significant ($p = 0.272$; Cohen's $h = 0.007$; power 6.8\%). The optimal bias and target layers require per-model calibration. Our cross-architecture coverage is limited to 7B-parameter models; whether the pattern holds for larger models or other direct-projection architectures remains open. The aggregate neglect depth does not predict individual hallucinations, and the intervention shows no improvement on open-ended VQA.
 
 %==============================================================================
 % 6. CONCLUSION
@@ -629,17 +326,9 @@ Sixth, the per-sample correlation analysis (Section~\ref{sec:persample}) shows t
 \section{Conclusion}
 \label{sec:conclusion}
 
-We have identified and comprehensively characterized the visual neglect zone, a systematic structural pattern in direct-projection vision-language models where middle transformer layers allocate disproportionately low attention to visual tokens. Through a multi-method mechanistic analysis spanning four architectures, we establish the following findings. The U-shaped neglect zone is reproducible across direct-projection VLMs with different language model backbones (Vicuna and Mistral, profile correlation $r{=}0.70$) but absent in Q-Former-based and alternative architectures, confirming it as a structural consequence of the direct-projection design. Hidden-state probing reveals that layer~31 functions as a near-pure language prior readout (residual update cosine similarity 0.922 regardless of image content), providing definitive mechanistic evidence for the previously observed attention anomaly. Gradient attribution independently validates the neglect zone through a 5$\times$ steeper-than-baseline decay of visual importance through layers 8--16. Per-sample analysis reveals that individual hallucination vulnerability manifests specifically at the neglect zone boundary (layers 14--17, $p < 0.002$), bridging model-level and sample-level perspectives.
+We have identified and characterized the visual neglect zone, a systematic structural pattern in direct-projection vision-language models where middle transformer layers allocate disproportionately low attention to visual tokens. Through a multi-method mechanistic analysis spanning four architectures, we establish the following findings. The U-shaped neglect zone is reproducible across direct-projection VLMs with different backbones ($r{=}0.70$) but absent in Q-Former-based and alternative architectures, confirming it as a structural consequence of the direct-projection design. Hidden-state probing reveals that layer~31 functions as a near-pure language prior readout (residual update cosine similarity 0.922). Gradient attribution independently validates the neglect zone through a 5$\times$ steeper-than-baseline decay of visual importance. Per-sample analysis reveals that hallucination vulnerability manifests at the neglect zone boundary (layers 14--17, $p < 0.002$).
 
-The simple \method{} intervention demonstrates that the neglect zone is causally linked to model calibration: correcting the attention deficit shifts yes-ratio on POPE from 42.8\% to exactly 50.0\%, improves Brier score, and improves visually demanding categories on MMStar by up to 5.6\%. Bayesian analysis confirms the calibration shift with 99.95\% posterior probability while the accuracy improvement remains genuinely ambiguous (67.8\% posterior probability; Cohen's $h{=}0.007$), supporting the diagnostic framing.
-
-Rather than claiming a new state-of-the-art method, we offer this work as a structural mechanistic contribution with two implications. For model developers, the neglect zone and language prior collapse suggest that training procedures should explicitly encourage sustained visual grounding in middle layers and reconsider the role of the final transformer layer in cross-modal integration, perhaps through auxiliary losses, architectural modifications, or attention regularization. For the interpretability community, the convergence of attention-based, hidden-state, and gradient-based analyses demonstrates that multimodal transformers exhibit rich, characterizable internal structure amenable to systematic investigation. We hope that understanding where, why, and how VLMs neglect visual information will inform more principled approaches to building models that truly attend to what they see.
-
-%==============================================================================
-% ACKNOWLEDGMENTS (for camera-ready)
-%==============================================================================
-% \section*{Acknowledgments}
-% Omitted for double-blind review.
+The \method{} intervention demonstrates that the neglect zone is causally linked to model calibration: correcting the attention deficit shifts POPE yes-ratio from 42.8\% to 50.0\%, improves Brier score, and improves visually demanding MMStar categories by up to 5.6\%. Bayesian analysis confirms the calibration shift with 99.95\% posterior probability while accuracy improvement remains ambiguous (67.8\% posterior; Cohen's $h{=}0.007$). Rather than claiming a new state-of-the-art method, we offer this work as a structural mechanistic contribution. For model developers, the neglect zone suggests that training procedures should encourage sustained visual grounding in middle layers. For the interpretability community, the convergence of attention-based, hidden-state, and gradient-based analyses demonstrates that multimodal transformers exhibit rich, characterizable internal structure amenable to systematic investigation.
 
 %==============================================================================
 % REFERENCES
